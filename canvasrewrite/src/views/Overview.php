@@ -1,0 +1,53 @@
+<?php
+
+/**
+ * Summary of RenderOverview
+ * @param GithublinkSubmission[] $Submissions
+ * @return void
+ */
+function RenderOverview(array $Submissions){
+    foreach($Submissions as $submission){
+        echo "<div>";
+        echo "URL: " . htmlspecialchars($submission->url) . "<br/>";
+        echo "Status: " . $submission->getStatus()->value . "<br/>";
+        echo "Submitted At: " . ($submission->submittedAt ? $submission->submittedAt->format("Y-m-d H:i:s") : "not submitted") . "<br/>";
+        echo "Students: ";
+        $students = $submission->getStudents();
+        $studentNames = array_map(fn($s) => htmlspecialchars($s->name), $students);
+        echo implode(", ", $studentNames);
+        echo "<br/>";
+        
+        if($submission->getStatus() == SubmissionStatus::VALID_URL){
+            $id = $submission->getCanvasID();
+            echo "<button onclick='clone($id)'>Clone</button><br>";
+        }
+        
+        echo "Feedback: ";
+        $feedbacks = $submission->getFeedback();
+        //sort feedbacks by date descending
+        usort($feedbacks, fn($a, $b) => $b->date <=> $a->date);
+        foreach($feedbacks as $feedback){
+            echo "<div style='border: 1px solid gray; padding: 5px; margin: 5px;'>";
+            echo "At " . $feedback->date->format("Y-m-d H:i:s") . ":<br/>";
+            echo nl2br(htmlspecialchars($feedback->comment));
+            echo "</div>";
+        }
+        echo "Commit History: <br/>";
+        if($submission->getStatus() != SubmissionStatus::VALID_URL){
+            echo "<em>No commit history available due to invalid submission status.</em>";
+        }
+        else{
+            $commits = $submission->getCommitHistory();
+            usort($commits, fn($a, $b) => $b->date <=> $a->date);
+            foreach($commits as $commit){
+                echo "<div style='border: 1px solid gray; padding: 5px; margin: 5px;'>";
+                echo "At " . $commit->date->format("Y-m-d H:i:s") . " by " . htmlspecialchars($commit->author) . ":<br/>";
+                echo "<strong>" . htmlspecialchars($commit->name) . "</strong><br/>";
+                echo nl2br(htmlspecialchars($commit->description));
+                echo "</div>";
+            }
+        }
+        echo "</div>";
+        echo "<hr/>";
+    }
+}
