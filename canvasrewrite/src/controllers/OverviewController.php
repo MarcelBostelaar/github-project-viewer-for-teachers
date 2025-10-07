@@ -3,7 +3,20 @@ require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../views/Overview.php';
 class OverviewController extends BaseController {
     public function route() {
-        switch($_GET['action'] ?? 'index') {
+        $actionGet = $_GET['action'] ?? null;
+        $actionPost = $_POST['action'] ?? null;
+        switch($actionPost ) {
+            case 'addfeedback':
+                $this->addFeedback();
+                return;
+            case null:
+                break;
+            default:
+                http_response_code(404);
+                echo "404 not found - Unknown action: " . htmlspecialchars($actionPost);
+                exit();
+        }
+        switch($actionGet ?? 'index') {
             case 'feedback':
                 $this->feedback();
                 return;
@@ -15,6 +28,8 @@ class OverviewController extends BaseController {
                 return;
             default:
                 http_response_code(404);
+                echo "404 not found - Unknown action: " . htmlspecialchars($actionGet);
+                exit();
         }
     }
     public function index(){
@@ -23,10 +38,22 @@ class OverviewController extends BaseController {
         RenderOverview($AllSubmissions);
     }
 
-    private function getSubmissionFromRequest(){
+    public function addFeedback(){
+        $submission = $this->getSubmissionFromRequest(false);
+        $feedback = $_POST['feedback'];
+        echo "Dummy addFeedback function.<br>Feedback: <pre>$feedback</pre><br> Processing feedback for students: " . htmlspecialchars(serialize($submission->getStudents()));
+        $this->index();
+    }
+
+    private function getSubmissionFromRequest($fromGet = true){
+        if($fromGet){
+            $source = $_GET;
+        } else {
+            $source = $_POST;
+        }
         global $providers;
-        $groupID = $_GET['groupid'] ?? null;
-        $userID = $_GET['userid'] ?? null;
+        $groupID = $source['groupid'] ?? null;
+        $userID = $source['userid'] ?? null;
         if($groupID !== null){
             return $providers->submissionProvider->getSubmissionForGroupID($groupID);
         }

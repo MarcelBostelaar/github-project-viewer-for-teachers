@@ -1,13 +1,15 @@
 <?php
 
 /**
- * @param SubmissionFeedback[] $Submissions
+ * Summary of renderFeedback
+ * @param SubmissionFeedback[] $feedbacks
+ * @return void
  */
 function renderFeedback(array $feedbacks){
     usort($feedbacks, fn($a, $b) => $b->date <=> $a->date);
     foreach($feedbacks as $feedback){
         echo "<div style='border: 1px solid gray; padding: 5px; margin: 5px;'>";
-        echo "At " . $feedback->date->format("Y-m-d H:i:s") . ":<br/>";
+        echo "At " . $feedback->date->format("Y-m-d H:i:s") . ", by $feedback->feedbackGiver:<br/>";
         echo nl2br(htmlspecialchars($feedback->comment));
         echo "</div>";
     }
@@ -98,6 +100,7 @@ function RenderOverview(array $Submissions){
                     $sectionsText = implode(", ", array_map('htmlspecialchars', $allSections));
                     
                     $isGroup = $submission->getGroup() !== null;
+                    $id = $isGroup ? $submission->getGroup()->id : $students[0]->id;
                     $idSection = $isGroup ? ("groupid=" . $submission->getGroup()->id) : ("userid=" . $students[0]->id);
                     ?>
                     <tr data-students="<?= strtolower(implode(' ', $studentNames)) ?>" 
@@ -121,13 +124,17 @@ function RenderOverview(array $Submissions){
                             <?php endif; ?>
                         </td>
                         <td>
-                            <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
-                                <div class="feedback-section">
+                            <div class="feedback-section">
+                                <form method="post">
+                                    <input type="hidden" name="action" value="addfeedback"/>
+                                    <input type="hidden" name="<?= $isGroup ? "groupid" : 'userid' ?>" value="<?=$id?>"/>
+                                    <textarea name="feedback" rows="4" cols="50" placeholder="Enter feedback here..." required></textarea><br/>
+                                    <button type="submit">Add Feedback</button>
+                                </form>
+                                <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
                                     <div postload="<?="?action=feedback&$idSection"?>">Loading feedback...</div>
-                                </div>
-                            <?php else: ?>
-                                -
-                            <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
                         </td>
                         <td>
                             <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
