@@ -1,57 +1,9 @@
 <?php
 
-const APIKSW = "api_keys_studentID_whitelist";
 function init_cache(){
     $_SESSION['cache'] = [
-        "values" => [],
-        APIKSW => []
+        "values" => []
     ];
-}
-
-//Whitelisting API keys for access to specific student IDs
-function checkTimeoutAPIKSW($key): bool{
-    if(isset($_SESSION['cache'][APIKSW][$key])){
-        if($_SESSION['cache'][APIKSW][$key]["expires"] < time()){
-            //expired
-            unset($_SESSION['cache'][APIKSW][$key]);
-            return false;
-        }
-        return true;
-    }
-    return false;
-}
-
-function whitelist_current_request_for_student_id_in_course(int $studentID){
-    global $studentDataCacheTimeout, $providers;
-    cache_start();
-    $key = $providers->canvasReader->getApiKey() . $providers->canvasReader->getCourseURL();
-    checkTimeoutAPIKSW($key);
-    if(!isset($_SESSION['cache'][APIKSW][$key])){
-        $_SESSION['cache'][APIKSW][$key] = [
-            "expires" => time() + $studentDataCacheTimeout,
-            "ids" => []
-        ];
-    }
-    $_SESSION['cache'][APIKSW][$key]["ids"][$studentID] = true;
-}
-
-/**
- * Summary of canSeeStudentInfo
- * @param mixed $apiKey
- * @param mixed $studentID
- * @return bool. True is whitelisted, false if unknown.
- */
-function canSeeStudentInfo($studentID): bool{
-    global $providers;
-    cache_start();
-    $key = $providers->canvasReader->getApiKey() . $providers->canvasReader->getCourseURL();
-    checkTimeoutAPIKSW($key);
-    if(isset($_SESSION['cache'][APIKSW][$key])){
-        if(isset($_SESSION['cache'][APIKSW][$key]["ids"][$studentID])){
-            return $_SESSION['cache'][APIKSW][$key]["ids"][$studentID];
-        }
-    }
-    return false;
 }
 
 function clearCacheForMetadata(callable $predicate){
@@ -63,45 +15,11 @@ function clearCacheForMetadata(callable $predicate){
     }
 }
 
-function clearCacheForStudentID($studentID){
-    clearCacheForMetadata(function($meta) use ($studentID){
-        if(is_array($meta) && isset($meta['studentID']) && $meta['studentID'] === $studentID)
-            return true;
-        return false;
-    });
-}
-
 function clearCacheForKey($key){
     cache_start();
     if(isset($_SESSION['cache']['values'][$key])){
         unset($_SESSION['cache']['values'][$key]);
     }
-}
-
-function getLastCacheDateForStudentID($studentID): ?DateTime{
-    cache_start();
-    $latest = new DateTime("1970-01-01");
-    foreach($_SESSION['cache']['values'] as $entry){
-        if(is_array($entry['metadata']) && isset($entry['metadata']['studentID']) && $entry['metadata']['studentID'] === $studentID){
-            if($latest === null || $entry['metadata']['date'] > $latest){
-                $latest = $entry['metadata']['date'];
-            }
-        }
-    }
-    return $latest;
-}
-
-function getLastCacheDateForAnyStudents(){
-    cache_start();
-    $latest = new DateTime("1970-01-01");
-    foreach($_SESSION['cache']['values'] as $entry){
-        if(is_array($entry['metadata']) && isset($entry['metadata']['studentID'])){
-            if($latest === null || $entry['metadata']['date'] > $latest){
-                $latest = $entry['metadata']['date'];
-            }
-        }
-    }
-    return $latest;
 }
 
 //general caching functions
