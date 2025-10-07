@@ -44,6 +44,17 @@ class UncachedGroupProvider{
         }
         return $groups;
     }
+
+    public function getStudentGroupLookup(): Lookup{
+        $groups = $this->getAllGroupsWithStudents();
+        $lookup = new Lookup();
+        foreach($groups as $group){
+            foreach($group->students as $student){
+                $lookup->add($student, $group);
+            }
+        }
+        return $lookup;
+    }
 }
 
 class GroupProvider extends UncachedGroupProvider{

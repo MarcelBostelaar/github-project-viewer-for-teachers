@@ -10,8 +10,12 @@ class CantDetermineValidURLException extends Exception{}
  */
 class CombinedGithublinkSubmission implements IGithublinkSubmission{
 
+    /**
+     * 
+     * @var ConcreteGithublinkSubmission[]
+     */
     private array $children;
-    private ?Group $group;
+    private Group $group;
 
     public function __construct(Group $group, ... $children){
         $this->children = $children;
@@ -127,5 +131,9 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
         catch(IllegalCallToInvalidSubmissionException $e){
             return null;
         }
+    }
+
+    public function getGroup(): ?Group{
+        return $this->group;
     }
 }

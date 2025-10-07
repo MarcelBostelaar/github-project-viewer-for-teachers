@@ -29,4 +29,5 @@ interface IGithublinkSubmission{
     public function clone(): string;
     public function getStatus(): SubmissionStatus;
     public function getSubmissionDate(): ?DateTime;
+    public function getGroup(): ?Group;
 }

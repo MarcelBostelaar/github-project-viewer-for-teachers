@@ -71,3 +71,12 @@ function array_unique_predicate($predicate, $array): array {
     }
     return $result;
 }
+
+function array_any($array, $predicate): bool {
+    foreach ($array as $item) {
+        if ($predicate($item)) {
+            return true;
+        }
+    }
+    return false;
+}

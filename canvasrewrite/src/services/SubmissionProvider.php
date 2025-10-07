@@ -12,7 +12,7 @@ class UncachedSubmissionProvider{
      * Gets all submissions without processing them into group submissions
      * @return ConcreteGithublinkSubmission[]
      */
-    protected function getAllNormalSubmissions(): array{
+    protected function getAllUnprocessedSubmissions(): array{
         global $providers;
         $data = $providers->canvasReader->fetchSubmissions();
         // formatted_var_dump($data);
@@ -26,45 +26,80 @@ class UncachedSubmissionProvider{
         return $processed;
     }
 
-    /**
-     * Provides a list of submissions, including group submissions (one per group)
-     * @return IGithublinkSubmission[]
-     */
-    public function getAllSubmissions(): array{
+    protected function getAllUngroupedSubmissions(): array{
         global $providers;
-
-        //getting all current groups
-        $groups = $providers->groupProvider->getAllGroupsWithStudents();
-        $studentLookup = new Lookup();
-        foreach($groups as $group){
-            foreach($group->students as $student){
-                $studentLookup->add($student->id, $group);
-            }
-        }
-
-        $submissions = $this->getAllNormalSubmissions();
+        $studentLookup = $providers->groupProvider->getStudentGroupLookup();
+        $submissions = $this->getAllUnprocessedSubmissions();
         $as_is = [];
 
-        //matching all submissions to the group based on the student who made the submission
-        $toGroupLookup = new Lookup();
         foreach($submissions as $submission){
-            $studentId = $submission->getStudent()->id;
-            $group = $studentLookup->getItem($studentId);
+            $student = $submission->getStudent();
+            $group = $studentLookup->getItem($student);
             if(count($group) == 0){
                 $as_is[] = $submission; //Not in any group, return as is.
+            }
+        }
+        return $as_is;
+    }
+
+    protected function getSubmissionsGroupLookup(): Lookup{
+        global $providers;
+        $submissions = $this->getAllUnprocessedSubmissions();
+        $studentLookup = $providers->groupProvider->getStudentGroupLookup();
+        $toGroupLookup = new Lookup();
+        foreach($submissions as $submission){
+            $student = $submission->getStudent();
+            $group = $studentLookup->getItem($student);
+            if(count($group) == 0){
+                //Not in any group
             }
             else if(count($group) > 1){
                 throw new Exception("Multiple groups for student found, should not be possible");
             }
             else{
-                //Assuming names are unique
                 $toGroupLookup->add($group[0], $submission);
             }
         }
-        $groupedSubmissions = array_map(
+        return $toGroupLookup;
+    }
+
+    protected function getGroupedSubmissions(): array{
+        $toGroupLookup = $this->getSubmissionsGroupLookup();
+        return array_map(
             fn($groupvals) => new CombinedGithublinkSubmission($groupvals["key"], ...$groupvals["value"]),
             $toGroupLookup->getKeyvalueList());
-        return array_merge($as_is, $groupedSubmissions);
+    }
+
+    /**
+     * Provides a list of submissions, including group submissions (one per group)
+     * @return IGithublinkSubmission[]
+     */
+    public function getAllSubmissions(): array{
+        $without_groups = $this->getAllUngroupedSubmissions();
+        $in_groups = $this->getGroupedSubmissions();
+        return array_merge($without_groups, $in_groups);
+    }
+
+    public function getSubmissionForGroupID(string $groupID): IGithublinkSubmission | null{
+        $all = $this->getAllSubmissions();
+        foreach($all as $submission){
+            if($submission->getGroup() !== null && $submission->getGroup()->id == $groupID){
+                return $submission;
+            }
+        }
+        return null;
+    }
+
+    public function getSubmissionForUserID(string $userID): IGithublinkSubmission | null{
+        $all = $this->getAllSubmissions();
+        foreach($all as $submission){
+            if(array_any($submission->getStudents(), fn($x) => $x->id == $userID)){
+                if($submission instanceof ConcreteGithublinkSubmission){
+                    return $submission;
+                }
+            }
+        }
+        return null;
     }
 
     public function getFeedbackForSubmission(int $submissionID): array{
@@ -82,11 +117,48 @@ class UncachedSubmissionProvider{
 }
 
 class SubmissionProvider extends UncachedSubmissionProvider{
+
+    protected function getAllUnprocessedSubmissions(): array{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getAllUnprocessedSubmissions(),
+        "SubmissionProvider - getAllNormalSubmissions");
+    }
+    protected function getAllUngroupedSubmissions(): array{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getAllUngroupedSubmissions(),
+        "SubmissionProvider - getAllUngroupedSubmissions");
+    }
+    protected function getSubmissionsGroupLookup(): Lookup{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getSubmissionsGroupLookup(),
+        "SubmissionProvider - getSubmissionsGroupLookup");
+    }
+    protected function getGroupedSubmissions(): array{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getGroupedSubmissions(),
+        "SubmissionProvider - getGroupedSubmissions");
+    }
     public function getAllSubmissions(): array{
         global $sharedCacheTimeout;
         return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
         fn() => parent::getAllSubmissions(),
         "SubmissionProvider - getAllSubmissions");
+    }
+    public function getSubmissionForGroupID(string $groupID): IGithublinkSubmission{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getSubmissionForGroupID($groupID),
+        "SubmissionProvider - getSubmissionForGroupID", $groupID);
+    }
+    public function getSubmissionForUserID(string $userID): IGithublinkSubmission{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getSubmissionForUserID($userID),
+        "SubmissionProvider - getSubmissionForUserID", $userID);
     }
 
     public function getFeedbackForSubmission(int $submissionID): array{
@@ -94,12 +166,5 @@ class SubmissionProvider extends UncachedSubmissionProvider{
         return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
         fn() => parent::getFeedbackForSubmission($submissionID),
         "SubmissionProvider - getFeedbackForSubmission", $submissionID);
-    }
-
-    protected function getAllNormalSubmissions(): array{
-        global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
-        fn() => parent::getAllNormalSubmissions(),
-        "SubmissionProvider - getAllNormalSubmissions");
     }
 }

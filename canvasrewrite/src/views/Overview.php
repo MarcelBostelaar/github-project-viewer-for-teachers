@@ -14,11 +14,28 @@ function renderFeedback(array $feedbacks){
 }
 
 /**
+ * Summary of renderCommitHistory
+ * @param CommitHistoryEntry[] $commits
+ * @return void
+ */
+function renderCommitHistory(array $commits){
+    usort($commits, fn($a, $b) => $b->date <=> $a->date);
+    foreach($commits as $commit){
+        echo "<div style='border: 1px solid gray; padding: 5px; margin: 5px;'>";
+        echo "At " . $commit->date->format("Y-m-d H:i:s") . " by " . htmlspecialchars($commit->author) . ":<br/>";
+        echo "<strong>" . htmlspecialchars($commit->name) . "</strong><br/>";
+        echo nl2br(htmlspecialchars($commit->description));
+        echo "</div>";
+    }
+}
+
+/**
  * Summary of RenderOverview
  * @param IGithublinkSubmission[] $Submissions
  * @return void
  */
-function RenderOverview(array $Submissions){
+function RenderOverview(array $Submissions, string $selfURL){
+    echo "<script src='/static/util/postloading.js'></script>";
     foreach($Submissions as $submission){
         echo "<div>";
         // echo "URL: " . htmlspecialchars($submission->get()) . "<br/>";
@@ -31,28 +48,25 @@ function RenderOverview(array $Submissions){
         echo "<br/>";
         
         if($submission->getStatus() == SubmissionStatus::VALID_URL){
-            // $id = $submission->getCanvasID();
-            echo "<button onclick='clone(-1)'>Clone</button><br>";
-        }
-        
-        echo "Feedback: ";
-        $feedbacks = $submission->getFeedback();
-        renderFeedback($feedbacks);
-        
-        echo "Commit History: <br/>";
-        if($submission->getStatus() != SubmissionStatus::VALID_URL){
-            echo "<em>No commit history available due to invalid submission status.</em>";
-        }
-        else{
-            $commits = $submission->getCommitHistory();
-            usort($commits, fn($a, $b) => $b->date <=> $a->date);
-            foreach($commits as $commit){
-                echo "<div style='border: 1px solid gray; padding: 5px; margin: 5px;'>";
-                echo "At " . $commit->date->format("Y-m-d H:i:s") . " by " . htmlspecialchars($commit->author) . ":<br/>";
-                echo "<strong>" . htmlspecialchars($commit->name) . "</strong><br/>";
-                echo nl2br(htmlspecialchars($commit->description));
-                echo "</div>";
+            $isGroup = $submission->getGroup() !== null;
+            $idSection = $isGroup ? ("groupid=" . $submission->getGroup()->id) : ("userid=" . $students[0]->id);
+
+            if($isGroup) {
+                $groupID = $submission->getGroup()->id;
+                echo "<button onclick='cloneGroup($groupID)'>Clone</button><br>";
             }
+            else{
+                $userID = $students[0]->id;
+                echo "<button onclick='cloneIndividual($userID)'>Clone</button><br>";
+            }
+
+            ?>
+            Feedback: <br>
+            <div postload='<?="?action=feedback&$idSection"?>'>Loading feedback</div>
+            
+            Commit History: <br/>
+            <div postload='<?="?action=commithistory&$idSection"?>'>Loading commit history</div>
+            <?php
         }
         echo "</div>";
         echo "<hr/>";
