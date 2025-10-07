@@ -63,9 +63,9 @@ function RenderOverview(array $Submissions){
                 <label for="status-filter">Filter by Status:</label>
                 <select id="status-filter" onchange="filterTable()">
                     <option value="">All Statuses</option>
-                    <option value="valid_url">Valid URL</option>
-                    <option value="missing">Missing</option>
-                    <option value="not_found">Not Found</option>
+                    <option value="<?= SubmissionStatus::VALID_URL->value ?>">Valid URL</option>
+                    <option value="<?= SubmissionStatus::MISSING->value ?>">Not submitted</option>
+                    <option value="<?= SubmissionStatus::NOTFOUND->value ?>">Not found (private?)</option>
                 </select>
             </div>
         </div>

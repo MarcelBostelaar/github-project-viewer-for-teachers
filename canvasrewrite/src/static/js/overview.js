@@ -7,9 +7,9 @@ function filterTable() {
 
     for (let i = 1; i < rows.length; i++) { // Skip header row
         const row = rows[i];
-        const students = row.getAttribute('data-students') || '';
-        const sections = row.getAttribute('data-sections') || '';
-        const status = row.getAttribute('data-status') || '';
+        const students = row.getAttribute('data-students').toLowerCase() || '';
+        const sections = row.getAttribute('data-sections').toLowerCase() || '';
+        const status = row.getAttribute('data-status').toLowerCase() || '';
 
         const matchesStudent = studentFilter === '' || students.includes(studentFilter);
         const matchesSection = sectionFilter === '' || sections.includes(sectionFilter);
