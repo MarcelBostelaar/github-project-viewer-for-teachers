@@ -15,15 +15,15 @@ function renderFeedback(array $feedbacks){
 
 /**
  * Summary of RenderOverview
- * @param GithublinkSubmission[] $Submissions
+ * @param IGithublinkSubmission[] $Submissions
  * @return void
  */
 function RenderOverview(array $Submissions){
     foreach($Submissions as $submission){
         echo "<div>";
-        echo "URL: " . htmlspecialchars($submission->url) . "<br/>";
+        // echo "URL: " . htmlspecialchars($submission->get()) . "<br/>";
         echo "Status: " . $submission->getStatus()->value . "<br/>";
-        echo "Submitted At: " . ($submission->submittedAt ? $submission->submittedAt->format("Y-m-d H:i:s") : "not submitted") . "<br/>";
+        echo "Submitted At: " . ($submission->getSubmissionDate() ? $submission->getSubmissionDate()->format("Y-m-d H:i:s") : "not submitted") . "<br/>";
         echo "Students: ";
         $students = $submission->getStudents();
         $studentNames = array_map(fn($s) => htmlspecialchars($s->name), $students);
@@ -31,8 +31,8 @@ function RenderOverview(array $Submissions){
         echo "<br/>";
         
         if($submission->getStatus() == SubmissionStatus::VALID_URL){
-            $id = $submission->getCanvasID();
-            echo "<button onclick='clone($id)'>Clone</button><br>";
+            // $id = $submission->getCanvasID();
+            echo "<button onclick='clone(-1)'>Clone</button><br>";
         }
         
         echo "Feedback: ";

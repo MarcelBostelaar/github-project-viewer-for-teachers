@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/Lookup.php";
 
 function isSetMany($object, ...$keys): mixed{
     foreach($keys as $key){

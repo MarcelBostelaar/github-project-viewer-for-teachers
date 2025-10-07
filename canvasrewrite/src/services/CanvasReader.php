@@ -7,14 +7,16 @@ require_once __DIR__ . '/../util/CanvasCurlCalls.php';
 require_once __DIR__ . '/../util/caching/CacheRules.php';
 
 class UncachedCanvasReader{
-    private $apiKey;
-    private $courseURL;
-    private $baseURL;
-    private $assignmentID;
-    private $assignmentURL;
+    protected $apiKey;
+    protected $courseURL;
+    protected $courseID;
+    protected $baseURL;
+    protected $assignmentID;
+    protected $assignmentURL;
 
     public function __construct($apiKey, $baseURL, $courseID, $assignmentID) {
         $this->apiKey = $apiKey;
+        $this->courseID = $courseID;
         $this->baseURL = $baseURL;
         $this->assignmentID = $assignmentID;
         $this->courseURL = "$baseURL/courses/$courseID";

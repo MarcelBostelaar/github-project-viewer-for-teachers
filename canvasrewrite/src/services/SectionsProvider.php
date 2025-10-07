@@ -8,10 +8,10 @@ class UncachedSectionsProvider{
      * @return string[]
      */
     public function getSectionsForStudent(int $studentId) : array{
-        return $this->getStudentSectionLookup()->getStudentSections($studentId);
+        return $this->getStudentSectionLookup()->getItem($studentId);
     }
 
-    protected function getStudentSectionLookup(): StudentSectionLookup {
+    protected function getStudentSectionLookup(): Lookup {
         global $providers;
         $sectionData = $providers->canvasReader->fetchSections();//reuse
         $perSection = array_map(fn($section) => [
@@ -21,21 +21,18 @@ class UncachedSectionsProvider{
                 $providers->canvasReader->fetchStudentsInSection($section["id"]))
         ], $sectionData);
 
-        $studentLookupTable = [];
+        $studentLookupTable = new Lookup();
         foreach($perSection as $section){
             foreach($section["students"] as $student){
-                if(!array_key_exists($student->id, $studentLookupTable)){
-                    $studentLookupTable[$student->id] = [];
-                }
-                $studentLookupTable[$student->id][] = $section["name"];
+                $studentLookupTable->add($student->id, $section["name"]);
             }
         }
-        return new StudentSectionLookup($studentLookupTable);
+        return $studentLookupTable;
     }
 }
 
 class SectionsProvider extends UncachedSectionsProvider{
-    protected function getStudentSectionLookup(): StudentSectionLookup{
+    protected function getStudentSectionLookup(): Lookup{
         global $sharedCacheTimeout;
         //Maximally restricted to single api keys, so that each teacher only gets the sections and students they are allowed to see.
         $data = cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,

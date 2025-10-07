@@ -5,6 +5,7 @@ require_once __DIR__ . '/GitProvider.php';
 require_once __DIR__ . '/SubmissionProvider.php';
 require_once __DIR__ . '/GroupProvider.php';
 require_once __DIR__ . '/SectionsProvider.php';
+require_once __DIR__ . '/../monkeypatch/MonkeyPatchedCanvasReader.php';
 
 
 class DependenciesContainer
@@ -39,6 +40,9 @@ function setupGlobalDependencies(): void
     
     //Debug
 
+
+    //Money patch
+    $dependencies->canvasReader = MonkeyPatchedCanvasReader::FromCanvasReader($dependencies->canvasReader);
     //set global provider variable
     $GLOBALS["providers"] = $dependencies;
 }

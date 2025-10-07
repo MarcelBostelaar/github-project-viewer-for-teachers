@@ -6,7 +6,7 @@ class TestController extends BaseController{
     public function index(){
         echo "Testcontroller<br>";
         global $providers;
-        formatted_var_dump($providers->groupProvider->getAllGroups());
+        // formatted_var_dump($providers->groupProvider->getAllGroups());
     }
 }
 
