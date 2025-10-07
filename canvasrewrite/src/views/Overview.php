@@ -1,6 +1,19 @@
 <?php
 
 /**
+ * @param SubmissionFeedback[] $Submissions
+ */
+function renderFeedback(array $feedbacks){
+    usort($feedbacks, fn($a, $b) => $b->date <=> $a->date);
+    foreach($feedbacks as $feedback){
+        echo "<div style='border: 1px solid gray; padding: 5px; margin: 5px;'>";
+        echo "At " . $feedback->date->format("Y-m-d H:i:s") . ":<br/>";
+        echo nl2br(htmlspecialchars($feedback->comment));
+        echo "</div>";
+    }
+}
+
+/**
  * Summary of RenderOverview
  * @param GithublinkSubmission[] $Submissions
  * @return void
@@ -24,14 +37,8 @@ function RenderOverview(array $Submissions){
         
         echo "Feedback: ";
         $feedbacks = $submission->getFeedback();
-        //sort feedbacks by date descending
-        usort($feedbacks, fn($a, $b) => $b->date <=> $a->date);
-        foreach($feedbacks as $feedback){
-            echo "<div style='border: 1px solid gray; padding: 5px; margin: 5px;'>";
-            echo "At " . $feedback->date->format("Y-m-d H:i:s") . ":<br/>";
-            echo nl2br(htmlspecialchars($feedback->comment));
-            echo "</div>";
-        }
+        renderFeedback($feedbacks);
+        
         echo "Commit History: <br/>";
         if($submission->getStatus() != SubmissionStatus::VALID_URL){
             echo "<em>No commit history available due to invalid submission status.</em>";
