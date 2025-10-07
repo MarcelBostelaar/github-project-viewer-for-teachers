@@ -20,7 +20,7 @@ class OverviewController extends BaseController {
     public function index(){
         global $providers;
         $AllSubmissions = $providers->submissionProvider->getAllSubmissions();
-        RenderOverview($AllSubmissions, "./OverviewController.php");
+        RenderOverview($AllSubmissions);
     }
 
     private function getSubmissionFromRequest(){

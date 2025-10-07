@@ -29,46 +29,125 @@ function renderCommitHistory(array $commits){
     }
 }
 
+function statusToClass(SubmissionStatus $status): string{
+    switch($status) {
+        case SubmissionStatus::MISSING:
+            return 'status-missing';
+        case SubmissionStatus::NOTFOUND:
+            return 'status-notfound';
+        case SubmissionStatus::VALID_URL:
+            return 'status-valid';
+    }
+    throw new Exception("Unknown status");
+}
+
 /**
  * Summary of RenderOverview
  * @param IGithublinkSubmission[] $Submissions
  * @return void
  */
-function RenderOverview(array $Submissions, string $selfURL){
-    echo "<script src='/static/util/postloading.js'></script>";
-    foreach($Submissions as $submission){
-        echo "<div>";
-        // echo "URL: " . htmlspecialchars($submission->get()) . "<br/>";
-        echo "Status: " . $submission->getStatus()->value . "<br/>";
-        echo "Submitted At: " . ($submission->getSubmissionDate() ? $submission->getSubmissionDate()->format("Y-m-d H:i:s") : "not submitted") . "<br/>";
-        echo "Students: ";
-        $students = $submission->getStudents();
-        $studentNames = array_map(fn($s) => htmlspecialchars($s->name), $students);
-        echo implode(", ", $studentNames);
-        echo "<br/>";
-        
-        if($submission->getStatus() == SubmissionStatus::VALID_URL){
-            $isGroup = $submission->getGroup() !== null;
-            $idSection = $isGroup ? ("groupid=" . $submission->getGroup()->id) : ("userid=" . $students[0]->id);
+function RenderOverview(array $Submissions){
+    ?>
 
-            if($isGroup) {
-                $groupID = $submission->getGroup()->id;
-                echo "<button onclick='cloneGroup($groupID)'>Clone</button><br>";
-            }
-            else{
-                $userID = $students[0]->id;
-                echo "<button onclick='cloneIndividual($userID)'>Clone</button><br>";
-            }
+    <div class="submissions-container">
+        <div class="filters">
+            <div class="filter-group">
+                <label for="student-filter">Filter by Student Name:</label>
+                <input type="text" id="student-filter" placeholder="Enter student name..." onkeyup="filterTable()">
+            </div>
+            <div class="filter-group">
+                <label for="section-filter">Filter by Section:</label>
+                <input type="text" id="section-filter" placeholder="Enter section..." onkeyup="filterTable()">
+            </div>
+            <div class="filter-group">
+                <label for="status-filter">Filter by Status:</label>
+                <select id="status-filter" onchange="filterTable()">
+                    <option value="">All Statuses</option>
+                    <option value="valid_url">Valid URL</option>
+                    <option value="missing">Missing</option>
+                    <option value="not_found">Not Found</option>
+                </select>
+            </div>
+        </div>
 
-            ?>
-            Feedback: <br>
-            <div postload='<?="?action=feedback&$idSection"?>'>Loading feedback</div>
-            
-            Commit History: <br/>
-            <div postload='<?="?action=commithistory&$idSection"?>'>Loading commit history</div>
-            <?php
-        }
-        echo "</div>";
-        echo "<hr/>";
-    }
+        <table class="submissions-table" id="submissions-table">
+            <thead>
+                <tr>
+                    <th>Students</th>
+                    <th>Sections</th>
+                    <th>Status</th>
+                    <th>Submitted At</th>
+                    <th>Actions</th>
+                    <th>Feedback</th>
+                    <th>Commit History</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                foreach($Submissions as $submission){
+                    $students = $submission->getStudents();
+                    $studentNames = array_map(fn($s) => htmlspecialchars($s->name), $students);
+                    
+                    // Get all sections for all students
+                    $allSections = [];
+                    foreach($students as $student) {
+                        $studentSections = $student->getSections();
+                        $allSections = array_merge($allSections, $studentSections);
+                    }
+                    $allSections = array_unique($allSections);
+                    $sectionsText = implode(", ", array_map('htmlspecialchars', $allSections));
+                    
+                    $isGroup = $submission->getGroup() !== null;
+                    $idSection = $isGroup ? ("groupid=" . $submission->getGroup()->id) : ("userid=" . $students[0]->id);
+                    ?>
+                    <tr data-students="<?= strtolower(implode(' ', $studentNames)) ?>" 
+                        data-sections="<?= strtolower($sectionsText) ?>" 
+                        data-status="<?= $submission->getStatus()->value ?>">
+                        <td><?= implode(",<br>", $studentNames) ?></td>
+                        <td><?= $sectionsText ?></td>
+                        <td><span class="<?= statusToClass($submission->getStatus()) ?>"><?= $submission->getStatus()->value ?></span></td>
+                        <td><?= $submission->getSubmissionDate() ? $submission->getSubmissionDate()->format("Y-m-d H:i:s") : "Not submitted" ?></td>
+                        <td>
+                            <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
+                                <?php if($isGroup): ?>
+                                    <?php $groupID = $submission->getGroup()->id; ?>
+                                    <button class="clone-btn" onclick="cloneGroup(<?= $groupID ?>)">Clone</button>
+                                <?php else: ?>
+                                    <?php $userID = $students[0]->id; ?>
+                                    <button class="clone-btn" onclick="cloneIndividual(<?= $userID ?>)">Clone</button>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
+                                <div class="feedback-section">
+                                    <div postload="<?="?action=feedback&$idSection"?>">Loading feedback...</div>
+                                </div>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
+                                <div class="commits-section">
+                                    <div postload="<?="?action=commithistory&$idSection"?>">Loading commit history...</div>
+                                </div>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php
+                }
+                ?>
+            </tbody>
+        </table>
+    </div>
+
+    <script src='/static/util/postloading.js'></script>
+    <script src="/static/js/overview.js"></script>
+    <link rel="stylesheet" href="/static/css/overview.css">
+    <?php
 }

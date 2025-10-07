@@ -1,9 +1,9 @@
 <?php
 
 enum SubmissionStatus : string{
-    case MISSING = "missing";
-    case NOTFOUND = "not_found";
-    case VALID_URL = "valid_url";
+    case MISSING = "Not submitted";
+    case NOTFOUND = "Not found (private?)";
+    case VALID_URL = "Valid URL";
 }
 
 
