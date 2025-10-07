@@ -1,20 +1,20 @@
 <?php
 require_once __DIR__ . '/CanvasReader.php';
-require_once __DIR__ . '/StudentProvider.php';
 require_once __DIR__ . '/GithubProvider.php';
 require_once __DIR__ . '/GitProvider.php';
 require_once __DIR__ . '/SubmissionProvider.php';
 require_once __DIR__ . '/GroupProvider.php';
+require_once __DIR__ . '/SectionsProvider.php';
 
 
 class DependenciesContainer
 {
     public CanvasReader $canvasReader;
-    public StudentProvider $studentProvider;
     public GithubProvider $githubProvider;
     public GitProvider $gitProvider;
     public SubmissionProvider $submissionProvider;
     public GroupProvider $groupProvider;
+    public SectionsProvider $sectionsProvider;
 }
 
 function readerFromEnv(): CanvasReader{
@@ -31,11 +31,11 @@ function setupGlobalDependencies(): void
     $dependencies = new DependenciesContainer();
 
     $dependencies->canvasReader = readerFromEnv();
-    $dependencies->studentProvider = new StudentProvider();
     $dependencies->githubProvider = new GithubProvider();
     $dependencies->groupProvider = new GroupProvider();
     $dependencies->gitProvider = new GitProvider();
     $dependencies->submissionProvider = new SubmissionProvider();
+    $dependencies->sectionsProvider = new SectionsProvider();
     
     //Debug
 

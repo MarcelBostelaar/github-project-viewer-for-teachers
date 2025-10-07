@@ -3,24 +3,17 @@
 class Student{
     public $id;
     public $name;
-
-    /**
-     * Summary of sections
-     * @var string[]
-     */
-    private array $sections;
-    public function __construct(int $id, string $naam, array $sections = []){
+    public function __construct(int $id, string $naam){
         $this->id = $id;
         $this->name = $naam;
-        $this->sections = $sections;
     }
 
     /**
-     * Summary of getSections
+     * All the sections this student is in (classes).
      * @return string[]
      */
     public function getSections(): array {
-        //TODO implement
-        return $this->sections;
+        global $providers;
+        return $providers->sectionsProvider->getSectionsForStudent($this->id);
     }
 }

@@ -47,6 +47,13 @@ class UncachedCanvasReader{
         return $data;
     }
 
+    public function fetchStudentsInSection($sectionID){
+        $url = "$this->baseURL/sections/$sectionID/enrollments?type[]=StudentEnrollment&per_page=100";
+        $data = curlCall($url, $this->apiKey);
+        $data = array_map(fn($x) => $x["user"], $data);
+        return $data;
+    }
+
     public function fetchSubmissions(){
         $url = "$this->assignmentURL/submissions?include[]=group&include[]=user&per_page=100";
         $data = curlCall($url, $this->apiKey);
@@ -55,6 +62,18 @@ class UncachedCanvasReader{
 
     public function fetchGroupUsers(int $groupID){
         $url = "$this->baseURL/groups/$groupID/users";
+        $data = curlCall($url, $this->apiKey);
+        return $data;
+    }
+
+    public function fetchAllGroupsInSet($groupSetID){
+        $url = "$this->baseURL/group_categories/$groupSetID/groups";
+        $data = curlCall($url, $this->apiKey);
+        return $data;
+    }
+
+    public function fetchAssignmentDetails(){
+        $url = $this->assignmentURL;
         $data = curlCall($url, $this->apiKey);
         return $data;
     }
