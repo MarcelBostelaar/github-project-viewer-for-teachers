@@ -22,6 +22,13 @@ function clearCacheForKey($key){
     }
 }
 
+function changeCacheExpireTimeForKey($key, $newExpireSeconds){
+    cache_start();
+    if(isset($_SESSION['cache']['values'][$key])){
+        $_SESSION['cache']['values'][$key]['expires_at'] = time() + $newExpireSeconds;
+    }
+}
+
 //general caching functions
 function clearCache(){
     //todo implement non-session

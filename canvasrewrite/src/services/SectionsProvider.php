@@ -36,7 +36,7 @@ class SectionsProvider extends UncachedSectionsProvider{
         global $sharedCacheTimeout;
         //Maximally restricted to single api keys, so that each teacher only gets the sections and students they are allowed to see.
         $data = cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
-        fn() => parent::getStudentSectionLookup(), "getStudentSectionLookup");
+        fn() => parent::getStudentSectionLookup(), "SectionProvider", "getStudentSectionLookup");
         return $data;
     }
 }

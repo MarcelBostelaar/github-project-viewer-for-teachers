@@ -36,13 +36,16 @@ class UncachedGithubProvider{
 class GithubProvider extends UncachedGithubProvider{
     public function validateUrl(string $url): bool {
         $rules = new SaveKeyWrapper(new Unrestricted());
-        global $sharedCacheTimeout;
+        global $veryLongTimeout, $dayTimeout;
         $result = cached_call($rules, 
-        $sharedCacheTimeout, fn() => parent::validateUrl($url),
+        $dayTimeout, fn() => parent::validateUrl($url),
         "GithubProvider", "validateURL", $url);
-        if(!$result){
-            //only cache positive validation.
-            clearCacheForKey($rules->generatedKey);
+        if($result){
+            //Very long cache.
+            changeCacheExpireTimeForKey($rules->generatedKey, $veryLongTimeout);
+        }
+        else{
+            //Very short cache.
         }
         return $result;
     }

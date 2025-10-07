@@ -2,7 +2,7 @@
 require_once __DIR__ . "/../models/Student.php";
 require_once __DIR__ . "/../models/Group.php";
 
-class GroupProvider{
+class UncachedGroupProvider{
     /**
      * Summary of getGroupName
      * @param int $groupID
@@ -43,5 +43,26 @@ class GroupProvider{
             $group->students = $this->getStudentsInGroup($group->id);
         }
         return $groups;
+    }
+}
+
+class GroupProvider extends UncachedGroupProvider{
+    public function getStudentsInGroup(int $groupID): array{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getStudentsInGroup($groupID),
+        "GroupProvider - getStudentsInGroup", $groupID);
+    }
+    protected function getAllGroups(): array{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getAllGroups(),
+        "GroupProvider - getAllGroups");
+    }
+    public function getAllGroupsWithStudents(): array{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getAllGroupsWithStudents(),
+        "GroupProvider - getAllGroupsWithStudents");
     }
 }

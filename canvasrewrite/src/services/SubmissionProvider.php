@@ -3,9 +3,10 @@ require_once __DIR__ . '/../models//GithublinkSubmission/IGithublinkSubmission.p
 require_once __DIR__ . '/../models//GithublinkSubmission/ConcreteGithublinkSubmission.php';
 require_once __DIR__ . '/../models//GithublinkSubmission/CombinedGithublinkSubmission.php';
 require_once __DIR__ . '/../util/UtilFuncs.php';
+require_once __DIR__ . '/../util/caching/MaximumAPIKeyRestrictions.php';
 
 
-class SubmissionProvider{
+class UncachedSubmissionProvider{
 
     /**
      * Gets all submissions without processing them into group submissions
@@ -77,5 +78,28 @@ class SubmissionProvider{
     public function submitFeedback(string $feedback, int $submissionID): void{
         //TODO implement
         throw new Exception("Not implemented");
+    }
+}
+
+class SubmissionProvider extends UncachedSubmissionProvider{
+    public function getAllSubmissions(): array{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getAllSubmissions(),
+        "SubmissionProvider - getAllSubmissions");
+    }
+
+    public function getFeedbackForSubmission(int $submissionID): array{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getFeedbackForSubmission($submissionID),
+        "SubmissionProvider - getFeedbackForSubmission", $submissionID);
+    }
+
+    protected function getAllNormalSubmissions(): array{
+        global $sharedCacheTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        fn() => parent::getAllNormalSubmissions(),
+        "SubmissionProvider - getAllNormalSubmissions");
     }
 }

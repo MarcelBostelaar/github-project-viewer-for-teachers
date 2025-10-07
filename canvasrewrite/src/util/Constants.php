@@ -5,5 +5,5 @@ $apiKey = $env['APIKEY'];
 $baseURL = $env['baseURL'];
 $courseID = (int)$env['courseID'];
 $sharedCacheTimeout = (int)$env['sharedCacheTimeout'];
-$studentDataCacheTimeout = (int)$env['studentDataCacheTimeout'];
-$roundToNearestOneOver = (int)$env['roundToNearestOneOver'];
+$veryLongTimeout = (int)$env['veryLongTimeout'];
+$dayTimeout = (int)$env['dayTimeout'];
