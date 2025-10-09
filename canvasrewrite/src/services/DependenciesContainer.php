@@ -49,7 +49,9 @@ function setupGlobalDependencies($courseID, $assignmentID): void
     // $dependencies->submissionProvider = new CaptureAndPreventSubmissionFeedback();
 
     //Money patch
-    $dependencies->canvasReader = MonkeyPatchedCanvasReader::FromCanvasReader($dependencies->canvasReader);
+    //Group set 1280 was removed, use 1300 instead for any assignments that used it
+    $dependencies->canvasReader = MonkeyPatchedCanvasReader::FromCanvasReader($dependencies->canvasReader, [1280 => 1300]);
+    
     //set global provider variable
     $GLOBALS["providers"] = $dependencies;
 }

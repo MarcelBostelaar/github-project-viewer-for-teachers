@@ -1,21 +1,24 @@
 <?php
 
 class MonkeyPatchedCanvasReader extends CanvasReader{
+    private array $rerouteGroups = [];
     /**
      * Fix for removed groupset in assignment.
      * @param mixed $groupSetID
      * @return array
      */
     public function fetchAllGroupsInSet($groupSetID){
-        if($groupSetID == 1280){
-            $groupSetID = 1300;
+        if(isset($this->rerouteGroups[$groupSetID])){
+            $groupSetID = $this->rerouteGroups[$groupSetID];
         }
         return parent::fetchAllGroupsInSet($groupSetID);
     }
 
-    public static function FromCanvasReader(CanvasReader $canvasReader){
+    public static function FromCanvasReader(CanvasReader $canvasReader, array $rerouteGroups = []){
         $patched = new MonkeyPatchedCanvasReader($canvasReader->apiKey, $canvasReader->baseURL, $canvasReader->courseID, $canvasReader->assignmentID);
-        // formatted_var_dump($patched);
+    
+        $patched->rerouteGroups = $rerouteGroups;
+
         return $patched;
     }
 }
