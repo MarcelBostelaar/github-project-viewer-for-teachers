@@ -118,6 +118,13 @@ function RenderSubmissionRow(IGithublinkSubmission $submission, string $baseURL)
     }
     $allSections = array_unique($allSections);
     $sectionsText = implode(", ", array_map('htmlspecialchars', $allSections));
+    $status = $submission->getStatus();
+    $appendToStatus = "";
+    if($status == SubmissionStatus::NOTFOUND){
+        $url = $submission->getUrl();
+        formatted_var_dump($submission);
+        $appendToStatus = "<br>Submitted URL:<br><a href='$url'>$url</a>";
+    }
     ?>
     <tr data-students="<?= strtolower(implode(' ', $studentNames)) ?>" 
         data-sections="<?= strtolower($sectionsText) ?>" 
@@ -125,7 +132,7 @@ function RenderSubmissionRow(IGithublinkSubmission $submission, string $baseURL)
         data-id="<?= $id ?>">
         <td><?= implode(",<br>", $studentNames) ?></td>
         <td><?= $sectionsText ?></td>
-        <td><span class="<?= statusToClass($submission->getStatus()) ?>"><?= $submission->getStatus()->value ?></span></td>
+        <td><span class="<?= statusToClass($submission->getStatus()) ?>"><?=$status->value . $appendToStatus?></span></td>
         <td><?= $submission->getSubmissionDate() ? $submission->getSubmissionDate()->format("Y-m-d H:i:s") : "Not submitted" ?></td>
         <td>
             <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>

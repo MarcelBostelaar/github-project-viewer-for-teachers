@@ -73,6 +73,9 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
                 if(!array_key_exists($child->getUrl(), $urls)){
                     $urls[$child->getUrl()] = [];
                 }
+                if($child->getUrl() == ""){
+                    throw new Exception("Child with VALID_URL status has empty URL, should not be possible");
+                }
                 $urls[$child->getUrl()][] = $child;
             }
         }
@@ -143,5 +146,9 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
     public function getId(): string{
         global $providers;
         return $providers->virtualIDsProvider->getVirtualIdFor($this);
+    }
+
+    public function getUrl(): ?string{
+        return $this->getMostLikelyValidChildOrThrow()->getUrl();
     }
 }

@@ -33,4 +33,5 @@ interface IGithublinkSubmission{
     public function getGroup(): ?Group;
 
     public function getId(): string;
+    public function getUrl(): ?string;
 }
