@@ -7,3 +7,4 @@ $courseID = (int)$env['courseID'];
 $sharedCacheTimeout = (int)$env['sharedCacheTimeout'];
 $veryLongTimeout = (int)$env['veryLongTimeout'];
 $dayTimeout = (int)$env['dayTimeout'];
+$githubAuthKey = $env['githubAuthKey'] ?? null;

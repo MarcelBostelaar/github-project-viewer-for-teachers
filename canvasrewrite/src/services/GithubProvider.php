@@ -2,7 +2,8 @@
 require_once __DIR__ . '/../util/caching/Caching.php';
 require_once __DIR__ . '/../util/caching/SaveKeyWrapper.php';
 require_once __DIR__ . '/../util/caching/Unrestricted.php';
-require_once __DIR__ . '/../util/GenericCurlCalls.php';
+require_once __DIR__ . '/../util/caching/SetMetadataType.php';
+require_once __DIR__ . '/../util/GithubCurlCalls.php';
 
 class DisectedURL{
     public string $owner;
@@ -15,7 +16,7 @@ class DisectedURL{
 
     public static function fromUrl(string $url) : ?DisectedURL{
         // echo "Matching URL:<br>";
-        var_dump($url);
+        // var_dump($url);
         // Match GitHub repo URLs: https://github.com/{owner}/{repo}[.git]
         $pattern = '/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?\/?$/';
         if (preg_match($pattern, $url, $matches)) {
@@ -63,25 +64,42 @@ class UncachedGithubProvider{
      * @return CommitHistoryEntry[]
      */
     public function getCommitHistory(string $url): array{
-        // if(!$this->validateUrl($url) === SubmissionStatus::VALID_URL){
-        //     throw new Exception("Invalid URL, cannot get commit history");
-        // }
-        // $url = DisectedURL::fromUrl($url);
-        // $data = genericCurlCall($url->toApiUrl() . "/commits");
-        // formatted_var_dump($data);
-        // // TODO implement    
-        return [
-            new CommitHistoryEntry("Initial commit", "Description", "Marcel Bostelaar", new DateTime("2024-01-01 12:00:00")),
-            new CommitHistoryEntry("Added README", "Description", "Marcel Bostelaar", new DateTime("2024-01-02 12:00:00")),
-            new CommitHistoryEntry("Fixed bugs", "Description", "Marcel Bostelaar", new DateTime("2024-01-03 12:00:00")),
-        ];
+        if(!$this->validateUrl($url) === SubmissionStatus::VALID_URL){
+            throw new Exception("Invalid URL, cannot get commit history");
+        }
+        $url = DisectedURL::fromUrl($url);
+        $data = genericCurlCall($url->toApiUrl() . "/commits");
+        if(isset($data['message'])){
+            if(str_contains($data['message'], "API rate limit exceeded")){
+                return [
+                    new CommitHistoryEntry("GitHub API rate limit exceeded. Please try again later or set authentication.", "System", new DateTime())
+                ];
+            }
+            if(str_contains($data['message'], "Git Repository is empty")){
+                return [];
+            }
+        }
+        try{
+            $history = array_map(function($commit) {
+                $commitDescription = $commit['commit']['message'];
+                $commitDate = $commit['commit']["author"]['date'];
+                $commitAuthor = $commit['commit']["author"]['name'];
+                return new CommitHistoryEntry($commitDescription, $commitAuthor, new DateTime($commitDate));
+            }, $data);
+            return $history;
+        }catch(Error $e){
+            $data = json_encode($data);
+            return [
+                new CommitHistoryEntry("Error fetching commit history: " . $e->getMessage() . "<br><pre>$data</pre>", "System", new DateTime())
+            ];
+        }
     }
 }
 
 class GithubProvider extends UncachedGithubProvider{
     public function validateUrl(string $url): SubmissionStatus {
-        $rules = new SaveKeyWrapper(new Unrestricted());
-        // $rules = new SaveKeyWrapper(new SetMetadataType(new Unrestricted(), "github"));
+        // $rules = new SaveKeyWrapper(new Unrestricted());
+        $rules = new SaveKeyWrapper(new SetMetadataType(new Unrestricted(), "github"));
         global $veryLongTimeout, $dayTimeout;
         $result = cached_call($rules, 
         $dayTimeout, fn() => parent::validateUrl($url),
@@ -96,12 +114,12 @@ class GithubProvider extends UncachedGithubProvider{
         return $result;
     }
 
-    // public function getCommitHistory(string $url): array {
-    //     $rules = new SetMetadataType(new Unrestricted(), "github");
-    //     global $dayTimeout;
-    //     $result = cached_call($rules, 
-    //     $dayTimeout, fn() => parent::getCommitHistory($url),
-    //     "GithubProvider", "getCommitHistory", $url);
-    //     return $result;
-    // }
+    public function getCommitHistory(string $url): array {
+        $rules = new SetMetadataType(new Unrestricted(), "github");
+        global $dayTimeout;
+        $result = cached_call($rules, 
+        $dayTimeout, fn() => parent::getCommitHistory($url),
+        "GithubProvider", "getCommitHistory", $url);
+        return $result;
+    }
 }

@@ -76,3 +76,9 @@
 textarea{
     width: 100%;
 }
+
+.commit_message{
+    border: 1px solid gray; 
+    padding: 5px; 
+    margin: 5px;
+}

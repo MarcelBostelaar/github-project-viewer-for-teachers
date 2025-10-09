@@ -49,7 +49,7 @@ class OverviewController extends BaseController {
     }
 
     public function commitHistory(){
-        renderCommitHistory($this->getSubmissionFromRequest()->getCommitHistory());
+        renderCommitHistory($this->getSubmissionFromRequest()->getCommitHistory(), 8);
     }
 
     public function submissionRow(){

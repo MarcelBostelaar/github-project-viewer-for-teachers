@@ -4,10 +4,16 @@ require_once __DIR__ . '/BaseController.php';
 
 class ClearCacheController extends BaseController{
     public function index(){
-        // if(isset($_GET['studentID'])){
-        //     $this->clearForStudentID(intval($_GET['studentID']));
-        //     return "Student id cache cleared.";
-        // }
+        if(isset($_GET['type'])){
+            clearCacheForMetadata(function($x){
+                if(isset($x['type']) && $x['type'] === $_GET['type']){
+                    return true;
+                }
+                return false;
+            });
+            echo "Cache cleared for type " . htmlspecialchars($_GET['type']) . ".";
+            return;
+        }
         clearCache();
         echo "Cache cleared.";
     }

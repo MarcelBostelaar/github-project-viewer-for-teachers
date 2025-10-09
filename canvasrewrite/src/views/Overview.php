@@ -15,19 +15,46 @@ function renderFeedback(array $feedbacks){
     }
 }
 
+function timeAgo(DateTime $past): string {
+    $now = new DateTime();
+    $diff = $now->getTimestamp() - $past->getTimestamp();
+
+    $units = [
+        'year' => 365 * 24 * 60 * 60,
+        'month' => 30 * 24 * 60 * 60,
+        'week' => 7 * 24 * 60 * 60,
+        'day' => 24 * 60 * 60,
+        'hour' => 60 * 60,
+        'minute' => 60,
+        'second' => 1,
+    ];
+
+    foreach ($units as $name => $seconds) {
+        if ($diff >= $seconds) {
+            $value = floor($diff / $seconds);
+            return "$value $name" . ($value > 1 ? 's' : '') . " ago";
+        }
+    }
+    return "just now";
+}
+
 /**
  * Summary of renderCommitHistory
  * @param CommitHistoryEntry[] $commits
  * @return void
  */
-function renderCommitHistory(array $commits){
+function renderCommitHistory(array $commits, $limit){
     usort($commits, fn($a, $b) => $b->date <=> $a->date);
+    $cutOff = max(0, count($commits) - $limit);
+    $commits = array_slice($commits, 0, $limit);
     foreach($commits as $commit){
-        echo "<div style='border: 1px solid gray; padding: 5px; margin: 5px;'>";
-        echo "At " . $commit->date->format("Y-m-d H:i:s") . " by " . htmlspecialchars($commit->author) . ":<br/>";
-        echo "<strong>" . htmlspecialchars($commit->name) . "</strong><br/>";
+        echo "<div class='commit_message'>";
+        echo timeAgo($commit->date) . " by " . htmlspecialchars($commit->author) . ":<br/>";
         echo nl2br(htmlspecialchars($commit->description));
         echo "</div>";
+    }
+    if($cutOff > 0){
+        echo "<div class='commit_message'>... and $cutOff more.</div>";
     }
 }
 
