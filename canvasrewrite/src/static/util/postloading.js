@@ -20,7 +20,7 @@ async function processPostload(replaceNode, url){
             throw new Error('Network response was not ok');
         }
         const html = await response.text();
-        const tempDiv = document.createElement('div');
+        const tempDiv = document.createElement(replaceNode.parentNode.tagName);
         tempDiv.innerHTML = html;
         replaceNode.replaceWith(...tempDiv.childNodes);
     } catch (error) {

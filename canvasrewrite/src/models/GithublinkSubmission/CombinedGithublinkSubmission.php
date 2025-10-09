@@ -128,12 +128,12 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
     }
 
     public function getSubmissionDate(): ?DateTime{
-        try{
-            return $this->getMostLikelyValidChildOrThrow()->getSubmissionDate();
-        }
-        catch(IllegalCallToInvalidSubmissionException $e){
+        $dates = array_map(fn($child) => $child->getSubmissionDate(), $this->children);
+        $dates = array_filter($dates, fn($d) => $d !== null);
+        if(count($dates) === 0){
             return null;
         }
+        return max($dates);
     }
 
     public function getGroup(): ?Group{

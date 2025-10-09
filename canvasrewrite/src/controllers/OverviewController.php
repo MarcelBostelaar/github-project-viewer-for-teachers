@@ -26,6 +26,9 @@ class OverviewController extends BaseController {
             case 'commithistory':
                 $this->commitHistory();
                 return;
+            case 'submissionrow':
+                $this->submissionRow();
+                return;
             case 'index':
                 $this->index();
                 return;
@@ -47,6 +50,11 @@ class OverviewController extends BaseController {
 
     public function commitHistory(){
         renderCommitHistory($this->getSubmissionFromRequest()->getCommitHistory());
+    }
+
+    public function submissionRow(){
+        $submission = $this->getSubmissionFromRequest();
+        RenderSubmissionRow($submission);
     }
 }
 

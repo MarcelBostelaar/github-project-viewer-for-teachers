@@ -19,7 +19,6 @@ interface CacheRules{
      * @return void
      */
     public function getMetaData(): array;
-
 }
 abstract class AGeneralCacheRules implements CacheRules{ 
     public function getKey(...$items): string{

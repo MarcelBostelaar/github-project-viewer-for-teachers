@@ -110,7 +110,7 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
             return SubmissionStatus::MISSING;
         } 
         global $providers;
-        return $providers->githubProvider->validateUrl($this->url) ? SubmissionStatus::VALID_URL : SubmissionStatus::NOTFOUND;
+        return $providers->githubProvider->validateUrl($this->url);
     }
 
     public function getSubmissionDate(): ?DateTime{

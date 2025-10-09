@@ -43,15 +43,98 @@ function statusToClass(SubmissionStatus $status): string{
     throw new Exception("Unknown status");
 }
 
+function RenderSubmissionRowStub(IGithublinkSubmission $submission){
+    $students = $submission->getStudents();
+    $studentNames = array_map(fn($s) => htmlspecialchars($s->name), $students);
+    // Get all sections for all students
+    $allSections = [];
+    foreach($students as $student) {
+        $studentSections = $student->getSections();
+        $allSections = array_merge($allSections, $studentSections);
+    }
+    $allSections = array_unique($allSections);
+    $sectionsText = implode(", ", array_map('htmlspecialchars', $allSections));
+    ?>
+    <tr data-students="<?= strtolower(implode(' ', $studentNames)) ?>" 
+        data-sections="<?= strtolower($sectionsText) ?>" 
+        data-status="loading"
+        postload="?action=submissionrow&id=<?=$submission->getId();?>">
+        <td><?= implode(",<br>", $studentNames) ?></td>
+        <td><?= $sectionsText ?></td>
+        <td>Loading status</td>
+        <td><?= $submission->getSubmissionDate() ? $submission->getSubmissionDate()->format("Y-m-d H:i:s") : "Not submitted" ?></td>
+        <td>
+            Loading...
+        </td>
+        <td>
+            Loading...
+        </td>
+        <td>
+            Loading...
+        </td>
+    </tr>
+    <?php
+}
+function RenderSubmissionRow(IGithublinkSubmission $submission){
+    $id = $submission->getId();
+    $students = $submission->getStudents();
+    $studentNames = array_map(fn($s) => htmlspecialchars($s->name), $students);
+    // Get all sections for all students
+    $allSections = [];
+    foreach($students as $student) {
+        $studentSections = $student->getSections();
+        $allSections = array_merge($allSections, $studentSections);
+    }
+    $allSections = array_unique($allSections);
+    $sectionsText = implode(", ", array_map('htmlspecialchars', $allSections));
+    ?>
+    <tr data-students="<?= strtolower(implode(' ', $studentNames)) ?>" 
+        data-sections="<?= strtolower($sectionsText) ?>" 
+        data-status="<?= $submission->getStatus()->value ?>">
+        <td><?= implode(",<br>", $studentNames) ?></td>
+        <td><?= $sectionsText ?></td>
+        <td><span class="<?= statusToClass($submission->getStatus()) ?>"><?= $submission->getStatus()->value ?></span></td>
+        <td><?= $submission->getSubmissionDate() ? $submission->getSubmissionDate()->format("Y-m-d H:i:s") : "Not submitted" ?></td>
+        <td>
+            <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
+                <button class="clone-btn" onclick="clone(<?= $id ?>)">Clone</button>
+            <?php else: ?>
+                -
+            <?php endif; ?>
+        </td>
+        <td>
+            <div class="feedback-section">
+                <form method="post">
+                    <input type="hidden" name="action" value="addfeedback"/>
+                    <input type="hidden" name="id" value="<?=$id?>"/>
+                    <textarea name="feedback" rows="4" cols="50" placeholder="Enter feedback here..." required></textarea><br/>
+                    <button type="submit">Add Feedback</button>
+                </form>
+                <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
+                    <div postload="<?="?action=feedback&id=$id"?>">Loading feedback...</div>
+                <?php endif; ?>
+            </div>
+        </td>
+        <td>
+            <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
+                <div class="commits-section">
+                    <div postload="<?="?action=commithistory&id=$id"?>">Loading commit history...</div>
+                </div>
+            <?php else: ?>
+                -
+            <?php endif;?>
+        </td>
+    </tr>
+    <?php
+}
+
 /**
  * Summary of RenderOverview
  * @param IGithublinkSubmission[] $Submissions
  * @return void
  */
 function RenderOverview(array $Submissions){
-    global $providers;
     ?>
-
     <div class="submissions-container">
         <div class="filters">
             <div class="filter-group">
@@ -88,58 +171,7 @@ function RenderOverview(array $Submissions){
             <tbody>
                 <?php
                 foreach($Submissions as $submission){
-                    $id = $submission->getId();
-                    $students = $submission->getStudents();
-                    $studentNames = array_map(fn($s) => htmlspecialchars($s->name), $students);
-                    
-                    // Get all sections for all students
-                    $allSections = [];
-                    foreach($students as $student) {
-                        $studentSections = $student->getSections();
-                        $allSections = array_merge($allSections, $studentSections);
-                    }
-                    $allSections = array_unique($allSections);
-                    $sectionsText = implode(", ", array_map('htmlspecialchars', $allSections));
-                    
-                    ?>
-                    <tr data-students="<?= strtolower(implode(' ', $studentNames)) ?>" 
-                        data-sections="<?= strtolower($sectionsText) ?>" 
-                        data-status="<?= $submission->getStatus()->value ?>">
-                        <td><?= implode(",<br>", $studentNames) ?></td>
-                        <td><?= $sectionsText ?></td>
-                        <td><span class="<?= statusToClass($submission->getStatus()) ?>"><?= $submission->getStatus()->value ?></span></td>
-                        <td><?= $submission->getSubmissionDate() ? $submission->getSubmissionDate()->format("Y-m-d H:i:s") : "Not submitted" ?></td>
-                        <td>
-                            <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
-                                <button class="clone-btn" onclick="clone(<?= $id ?>)">Clone</button>
-                            <?php else: ?>
-                                -
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <div class="feedback-section">
-                                <form method="post">
-                                    <input type="hidden" name="action" value="addfeedback"/>
-                                    <input type="hidden" name="id" value="<?=$id?>"/>
-                                    <textarea name="feedback" rows="4" cols="50" placeholder="Enter feedback here..." required></textarea><br/>
-                                    <button type="submit">Add Feedback</button>
-                                </form>
-                                <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
-                                    <div postload="<?="?action=feedback&id=$id"?>">Loading feedback...</div>
-                                <?php endif; ?>
-                            </div>
-                        </td>
-                        <td>
-                            <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
-                                <div class="commits-section">
-                                    <div postload="<?="?action=commithistory&id=$id"?>">Loading commit history...</div>
-                                </div>
-                            <?php else: ?>
-                                -
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <?php
+                    RenderSubmissionRowStub($submission);
                 }
                 ?>
             </tbody>
