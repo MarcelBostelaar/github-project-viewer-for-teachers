@@ -9,7 +9,7 @@ function renderFeedback(array $feedbacks){
     usort($feedbacks, fn($a, $b) => $b->date <=> $a->date);
     foreach($feedbacks as $feedback){
         echo "<div class='feedback_entry'>";
-        echo "<h5 class=feedback_author>$feedback->feedbackGiver - " . $feedback->date->format("Y-m-d H:i:s") . ":</h5>";
+        echo "<h5 class=author>$feedback->feedbackGiver - " . $feedback->date->format("Y-m-d H:i:s") . ":</h5>";
         echo nl2br(htmlspecialchars($feedback->comment));
         echo "</div>";
     }
@@ -49,7 +49,7 @@ function renderCommitHistory(array $commits, $limit){
     $commits = array_slice($commits, 0, $limit);
     foreach($commits as $commit){
         echo "<div class='commit_message'>";
-        echo timeAgo($commit->date) . " by " . htmlspecialchars($commit->author) . ":<br/>";
+        echo "<h5 class=author>" . timeAgo($commit->date) . " by " . htmlspecialchars($commit->author) . ":</h5>";
         echo nl2br(htmlspecialchars($commit->description));
         echo "</div>";
     }
@@ -117,14 +117,15 @@ function RenderSubmissionRow(IGithublinkSubmission $submission){
     ?>
     <tr data-students="<?= strtolower(implode(' ', $studentNames)) ?>" 
         data-sections="<?= strtolower($sectionsText) ?>" 
-        data-status="<?= $submission->getStatus()->value ?>">
+        data-status="<?= $submission->getStatus()->value ?>"
+        data-id="<?= $id ?>">
         <td><?= implode(",<br>", $studentNames) ?></td>
         <td><?= $sectionsText ?></td>
         <td><span class="<?= statusToClass($submission->getStatus()) ?>"><?= $submission->getStatus()->value ?></span></td>
         <td><?= $submission->getSubmissionDate() ? $submission->getSubmissionDate()->format("Y-m-d H:i:s") : "Not submitted" ?></td>
         <td>
             <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
-                <button class="clone-btn" onclick="clone('<?= $id ?>')">Clone</button>
+                <button class="clone-btn" onclick="clone(this, '<?= $id ?>')">Clone</button>
             <?php else: ?>
                 -
             <?php endif; ?>

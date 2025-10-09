@@ -94,11 +94,30 @@ async function submitFeedback(form, submissionId, event) {
     return false; // Prevent default form submission
 }
 
-function setActiveRepo(id){
-    localStorage.setItem('lastClonedRepo', id);
+function refreshActiveRepoVisuals(){
+    let lastClonedRepo = localStorage.getItem('lastClonedRepo');
+    if(!lastClonedRepo) return;
+
+    const rows = document.querySelectorAll('#submissions-table tbody tr');
+    console.log(rows);
+    rows.forEach(row => {
+        if(row.getAttribute('data-id') == lastClonedRepo){
+            row.classList.add('active-repo');
+        } else {
+            row.classList.remove('active-repo');
+        }
+    });
 }
 
-function clone(id){
+function setActiveRepo(id){
+    localStorage.setItem('lastClonedRepo', id);
+    refreshActiveRepoVisuals();
+}
+
+function clone(cloneButton, id){
+    let oldText = cloneButton.textContent;
+    cloneButton.textContent = 'Cloning...';
+    cloneButton.disabled = true;
     const formData = new FormData();
     formData.append('id', id);
     fetch(`/controllers/api/CloneController.php`, {
@@ -118,6 +137,10 @@ function clone(id){
     .catch(error => {
         console.error('Error cloning:', error);
         alert('Failed to clone.');
+    })
+    .finally(() => {
+        cloneButton.textContent = oldText;
+        cloneButton.disabled = false;
     });
 }
 
@@ -133,3 +156,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+document.addEventListener('PostloadingFinished', refreshActiveRepoVisuals);

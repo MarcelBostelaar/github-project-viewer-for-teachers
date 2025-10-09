@@ -83,7 +83,32 @@ textarea{
     margin: 5px;
 }
 
-.feedback_author{
+.author{
     margin-top: 0;
     margin-bottom: 5px;
+}
+
+.active-repo {
+    /* background-color: #7b9d8e !important; */
+    border-color: green !important;
+    border-style: solid !important;
+    border-width: 8px 0px 8px 0px !important;
+    position: relative;
+}
+
+.active-repo::after {
+    content: "(Last Cloned)";
+    color: white;
+    font-weight: bold;
+    position: absolute;
+    top: 0;              /* start at the top of the parent */
+    left: 0;
+    font-size: 0.8em;   /* slightly smaller text */
+    background-color: green;
+    border-radius: 0px 0px 10px 0px;
+    padding: 0 3px 3px 3px;
+}
+
+.active-repo td{
+    padding-top: 20px;
 }

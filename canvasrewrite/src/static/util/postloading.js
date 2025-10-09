@@ -5,7 +5,10 @@ async function findMarkedForPostLoading(inItem){
     
     toProcess = toProcess.map(element => processPostload(element, element.getAttribute("postload")));
 
-    if(toProcess.length === 0) return Promise.resolve();
+    if(toProcess.length === 0) {
+        document.dispatchEvent(new CustomEvent("PostloadingFinished"));
+        return Promise.resolve(); 
+    }
 
     return Promise.all(toProcess).then(() => {
         findMarkedForPostLoading(inItem); //Recursively process newly loaded content
