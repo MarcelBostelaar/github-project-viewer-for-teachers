@@ -2,8 +2,22 @@
 require_once __DIR__ . '/../services/DependenciesContainer.php';
 require_once __DIR__ . '/../util/UtilFuncs.php';
 class BaseController{
+    protected $courseID;
+    protected $assignmentID;
     public function __construct(){
-        setupGlobalDependencies();
+        $this->courseID = $_GET['course'] ?? $_POST['course'] ?? null;
+        $this->assignmentID = $_GET['assignment'] ?? $_POST['assignment'] ?? null;
+        if($this->courseID == null){
+            http_response_code(400);
+            echo "Missing course parameter.";
+            exit();
+        }
+        if($this->assignmentID == null){
+            http_response_code(400);
+            echo "Missing assignment parameter.";
+            exit();
+        }
+        setupGlobalDependencies($this->courseID, $this->assignmentID);
     }
 
     protected function getSubmissionFromRequest($fromGet = true){

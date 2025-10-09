@@ -61,9 +61,11 @@ async function submitFeedback(form, submissionId, event) {
         // Refresh the feedback section to show the new feedback
         const feedbackDiv = form.parentNode.querySelector('.feedback-container');
         if (feedbackDiv) {
+            let currentCourse = urlParams.get('course');
+            let currentAssignment = urlParams.get('assignment');
             let tempdiv = document.createElement('div');
             tempdiv.innerHTML = 'Reloading feedback...';
-            tempdiv.setAttribute('postload', `?action=feedback&id=${submissionId}`);
+            tempdiv.setAttribute('postload', `?course=${currentCourse}&assignment=${currentAssignment}&action=feedback&id=${submissionId}`);
             feedbackDiv.replaceChildren(tempdiv);
             // Trigger postloading for this specific element
         }
@@ -115,12 +117,16 @@ function setActiveRepo(id){
 }
 
 function clone(cloneButton, id){
+    // Get currentCourse from URL (assuming ?course=123 or similar)
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentCourse = urlParams.get('course');
+    let currentAssignment = urlParams.get('assignment');
     let oldText = cloneButton.textContent;
     cloneButton.textContent = 'Cloning...';
     cloneButton.disabled = true;
     const formData = new FormData();
     formData.append('id', id);
-    fetch(`/controllers/api/CloneController.php`, {
+    fetch(`/controllers/api/CloneController.php?course=${currentCourse}&assignment=${currentAssignment}`, {
         method: 'POST',
         body: formData
     })
@@ -141,6 +147,31 @@ function clone(cloneButton, id){
     .finally(() => {
         cloneButton.textContent = oldText;
         cloneButton.disabled = false;
+    });
+}
+
+function clearCache(type = 'all'){
+    if(!confirm(`Are you sure you want to clear the ${type} cache? Reload may take time.`)){
+        return;
+    }
+    //fetch clear cache endpoint
+    let appendix = "";
+    if(type != "all"){
+        appendix = `?type=${type}`;
+    }
+    fetch(`/controllers/ClearCacheController.php` + appendix)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(data => {
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error clearing cache:', error);
+        alert('Failed to clear cache.');
     });
 }
 

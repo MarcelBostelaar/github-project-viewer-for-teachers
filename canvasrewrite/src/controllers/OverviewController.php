@@ -41,7 +41,7 @@ class OverviewController extends BaseController {
     public function index(){
         global $providers;
         $AllSubmissions = $providers->submissionProvider->getAllSubmissions();
-        RenderOverview($AllSubmissions);
+        RenderOverview($AllSubmissions, $this->getBaseURL());
     }
 
     public function feedback(){
@@ -53,8 +53,13 @@ class OverviewController extends BaseController {
     }
 
     public function submissionRow(){
+        global $providers;
         $submission = $this->getSubmissionFromRequest();
-        RenderSubmissionRow($submission);
+        RenderSubmissionRow($submission, $this->getBaseURL());
+    }
+
+    private function getBaseURL(): string {
+        return "/controllers/OverviewController.php?course=$this->courseID&assignment=$this->assignmentID";
     }
 }
 

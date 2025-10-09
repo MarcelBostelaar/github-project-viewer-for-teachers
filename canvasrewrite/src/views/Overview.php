@@ -66,11 +66,14 @@ function statusToClass(SubmissionStatus $status): string{
             return 'status-notfound';
         case SubmissionStatus::VALID_URL:
             return 'status-valid';
+        case SubmissionStatus::VALID_BUT_EMPTY:
+            return 'status-empty';
     }
     throw new Exception("Unknown status");
 }
 
-function RenderSubmissionRowStub(IGithublinkSubmission $submission){
+function RenderSubmissionRowStub(IGithublinkSubmission $submission, string $baseURL){
+    $id = $submission->getId();
     $students = $submission->getStudents();
     $studentNames = array_map(fn($s) => htmlspecialchars($s->name), $students);
     // Get all sections for all students
@@ -85,7 +88,7 @@ function RenderSubmissionRowStub(IGithublinkSubmission $submission){
     <tr data-students="<?= strtolower(implode(' ', $studentNames)) ?>" 
         data-sections="<?= strtolower($sectionsText) ?>" 
         data-status="loading"
-        postload="?action=submissionrow&id=<?=$submission->getId();?>">
+        postload="<?=$baseURL?>&action=submissionrow&id=<?=$submission->getId();?>">
         <td><?= implode(",<br>", $studentNames) ?></td>
         <td><?= $sectionsText ?></td>
         <td>Loading status</td>
@@ -102,7 +105,8 @@ function RenderSubmissionRowStub(IGithublinkSubmission $submission){
     </tr>
     <?php
 }
-function RenderSubmissionRow(IGithublinkSubmission $submission){
+
+function RenderSubmissionRow(IGithublinkSubmission $submission, string $baseURL){
     $id = $submission->getId();
     $students = $submission->getStudents();
     $studentNames = array_map(fn($s) => htmlspecialchars($s->name), $students);
@@ -136,17 +140,15 @@ function RenderSubmissionRow(IGithublinkSubmission $submission){
                     <textarea name="feedback" rows="4" cols="50" placeholder="Enter feedback here..." required></textarea><br/>
                     <button type="submit">Add Feedback</button>
                 </form>
-                <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
-                    <div class="feedback-container">
-                        <div postload="<?="?action=feedback&id=$id"?>">Loading feedback...</div>
-                    </div>
-                <?php endif; ?>
+                <div class="feedback-container">
+                    <div postload="<?="$baseURL&action=feedback&id=$id"?>">Loading feedback...</div>
+                </div>
             </div>
         </td>
         <td>
             <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
                 <div class="commits-section">
-                    <div postload="<?="?action=commithistory&id=$id"?>">Loading commit history...</div>
+                    <div postload="<?="$baseURL&action=commithistory&id=$id"?>">Loading commit history...</div>
                 </div>
             <?php else: ?>
                 -
@@ -161,8 +163,10 @@ function RenderSubmissionRow(IGithublinkSubmission $submission){
  * @param IGithublinkSubmission[] $Submissions
  * @return void
  */
-function RenderOverview(array $Submissions){
+function RenderOverview(array $Submissions, $baseURL){
     ?>
+    <button onclick="clearCache()">Fully clear cache (slow)</button>
+    <button onclick="clearCache('github')">Clear github cache</button>
     <div class="submissions-container">
         <div class="filters">
             <div class="filter-group">
@@ -199,7 +203,7 @@ function RenderOverview(array $Submissions){
             <tbody>
                 <?php
                 foreach($Submissions as $submission){
-                    RenderSubmissionRowStub($submission);
+                    RenderSubmissionRowStub($submission, $baseURL);
                 }
                 ?>
             </tbody>

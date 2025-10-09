@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../util/Caching/Caching.php';
 require_once __DIR__ . '/BaseController.php';
 
-class ClearCacheController extends BaseController{
+class ClearCacheController{
     public function index(){
         if(isset($_GET['type'])){
             clearCacheForMetadata(function($x){

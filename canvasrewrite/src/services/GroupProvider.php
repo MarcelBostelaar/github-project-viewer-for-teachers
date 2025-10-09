@@ -59,20 +59,20 @@ class UncachedGroupProvider{
 
 class GroupProvider extends UncachedGroupProvider{
     public function getStudentsInGroup(int $groupID): array{
-        global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        global $veryLongTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $veryLongTimeout,
         fn() => parent::getStudentsInGroup($groupID),
         "GroupProvider - getStudentsInGroup", $groupID);
     }
     protected function getAllGroups(): array{
-        global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        global $veryLongTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $veryLongTimeout,
         fn() => parent::getAllGroups(),
         "GroupProvider - getAllGroups");
     }
     public function getAllGroupsWithStudents(): array{
-        global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        global $veryLongTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $veryLongTimeout,
         fn() => parent::getAllGroupsWithStudents(),
         "GroupProvider - getAllGroupsWithStudents");
     }

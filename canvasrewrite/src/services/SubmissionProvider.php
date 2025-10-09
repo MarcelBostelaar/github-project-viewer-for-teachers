@@ -128,54 +128,54 @@ class UncachedSubmissionProvider{
 class SubmissionProvider extends UncachedSubmissionProvider{
 
     protected function getAllUnprocessedSubmissions(): array{
-        global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        global $veryLongTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $veryLongTimeout,
         fn() => parent::getAllUnprocessedSubmissions(),
         "SubmissionProvider - getAllNormalSubmissions");
     }
     protected function getAllUngroupedSubmissions(): array{
-        global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        global $veryLongTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $veryLongTimeout,
         fn() => parent::getAllUngroupedSubmissions(),
         "SubmissionProvider - getAllUngroupedSubmissions");
     }
     protected function getSubmissionsGroupLookup(): Lookup{
-        global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        global $veryLongTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $veryLongTimeout,
         fn() => parent::getSubmissionsGroupLookup(),
         "SubmissionProvider - getSubmissionsGroupLookup");
     }
     protected function getGroupedSubmissions(): array{
-        global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        global $veryLongTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $veryLongTimeout,
         fn() => parent::getGroupedSubmissions(),
         "SubmissionProvider - getGroupedSubmissions");
     }
     public function getAllSubmissions(): array{
-        global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        global $veryLongTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $veryLongTimeout,
         fn() => parent::getAllSubmissions(),
         "SubmissionProvider - getAllSubmissions");
     }
     public function getSubmissionForGroupID(int $groupID): IGithublinkSubmission | null{
-        global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        global $veryLongTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $veryLongTimeout,
         fn() => parent::getSubmissionForGroupID($groupID),
         "SubmissionProvider - getSubmissionForGroupID", $groupID);
     }
     public function getSubmissionForUserID(int $userID): ConcreteGithublinkSubmission | null{
-        global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
+        global $veryLongTimeout;
+        return cached_call(new MaximumAPIKeyRestrictions(), $veryLongTimeout,
         fn() => parent::getSubmissionForUserID($userID),
         "SubmissionProvider - getSubmissionForUserID", $userID);
     }
 
     public function getFeedbackForSubmission(int $userID): array{
-        global $sharedCacheTimeout;
+        global $veryLongTimeout;
         return cached_call(
             //Set metadata so we can invalidate the submission feedback cache when we post new feedback
             new SetMetadata( new MaximumAPIKeyRestrictions(), ["comment_userID" => $userID]), 
-            $sharedCacheTimeout,
+            $veryLongTimeout,
         fn() => parent::getFeedbackForSubmission($userID),
         "SubmissionProvider - getFeedbackForSubmission", $userID);
     }

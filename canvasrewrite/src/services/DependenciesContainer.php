@@ -21,21 +21,19 @@ class DependenciesContainer
     public VirtualIDsProvider $virtualIDsProvider;
 }
 
-function readerFromEnv(): CanvasReader{
+function readerFromEnv($courseID, $assignmentID): CanvasReader{
     $env = parse_ini_file(__DIR__ . '/../../.env');
     $apiKey = $env['APIKEY'];
     $baseURL = $env['baseURL'];
-    $courseID = $env['courseID'];
-    $assignmentID = $env['assignmentID'];
     return new CanvasReader($apiKey, $baseURL, $courseID, $assignmentID);
 }
 
-function setupGlobalDependencies(): void
+function setupGlobalDependencies($courseID, $assignmentID): void
 {
     $env = parse_ini_file(__DIR__ . '/../../.env');
     $dependencies = new DependenciesContainer();
 
-    $dependencies->canvasReader = readerFromEnv();
+    $dependencies->canvasReader = readerFromEnv($courseID, $assignmentID);
     $dependencies->githubProvider = new GithubProvider();
     $dependencies->groupProvider = new GroupProvider();
     $cloneToFolder = $env['clonetofolder'] ?? null;
