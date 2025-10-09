@@ -8,8 +8,8 @@
 function renderFeedback(array $feedbacks){
     usort($feedbacks, fn($a, $b) => $b->date <=> $a->date);
     foreach($feedbacks as $feedback){
-        echo "<div style='border: 1px solid gray; padding: 5px; margin: 5px;'>";
-        echo "At " . $feedback->date->format("Y-m-d H:i:s") . ", by $feedback->feedbackGiver:<br/>";
+        echo "<div class='feedback_entry'>";
+        echo "<h5 class=feedback_author>$feedback->feedbackGiver - " . $feedback->date->format("Y-m-d H:i:s") . ":</h5>";
         echo nl2br(htmlspecialchars($feedback->comment));
         echo "</div>";
     }
@@ -131,14 +131,14 @@ function RenderSubmissionRow(IGithublinkSubmission $submission){
         </td>
         <td>
             <div class="feedback-section">
-                <form method="post">
-                    <input type="hidden" name="action" value="addfeedback"/>
-                    <input type="hidden" name="id" value="<?=$id?>"/>
+                <form method="post" onsubmit="return submitFeedback(this, <?=$id?>, event)">
                     <textarea name="feedback" rows="4" cols="50" placeholder="Enter feedback here..." required></textarea><br/>
                     <button type="submit">Add Feedback</button>
                 </form>
                 <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
-                    <div postload="<?="?action=feedback&id=$id"?>">Loading feedback...</div>
+                    <div class="feedback-container">
+                        <div postload="<?="?action=feedback&id=$id"?>">Loading feedback...</div>
+                    </div>
                 <?php endif; ?>
             </div>
         </td>

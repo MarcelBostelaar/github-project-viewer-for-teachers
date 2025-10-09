@@ -1,13 +1,13 @@
 
-function findMarkedForPostLoading(inItem){
+async function findMarkedForPostLoading(inItem){
     let toProcess = inItem.querySelectorAll("[postload]");
     toProcess = Array.from(toProcess);
     
     toProcess = toProcess.map(element => processPostload(element, element.getAttribute("postload")));
 
-    if(toProcess.length === 0) return;
+    if(toProcess.length === 0) return Promise.resolve();
 
-    Promise.all(toProcess).then(() => {
+    return Promise.all(toProcess).then(() => {
         findMarkedForPostLoading(inItem); //Recursively process newly loaded content
     });
 }
