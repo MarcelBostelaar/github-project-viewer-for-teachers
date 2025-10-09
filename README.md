@@ -64,3 +64,4 @@ This tool bridges the gap between Canvas LMS assignments and GitHub repositories
 This tool transforms the traditionally fragmented process of reviewing GitHub-based assignments into a cohesive, efficient workflow that allows educators to focus on what matters most: providing quality feedback and supporting student learning.
 
 [Click here for info on the monkey patch](doc/monkeypatch.md)
+
