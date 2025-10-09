@@ -20,6 +20,9 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
     public function __construct(Group $group, ... $children){
         $this->children = $children;
         $this->group = $group;
+
+        global $providers;
+        $providers->virtualIDsProvider->getVirtualIdFor($this);
     }
 
     public function getStudents(): array{

@@ -4,6 +4,7 @@ require_once __DIR__ . '/../models//GithublinkSubmission/ConcreteGithublinkSubmi
 require_once __DIR__ . '/../models//GithublinkSubmission/CombinedGithublinkSubmission.php';
 require_once __DIR__ . '/../util/UtilFuncs.php';
 require_once __DIR__ . '/../util/caching/MaximumAPIKeyRestrictions.php';
+require_once __DIR__ . '/../util/caching/CourseAPIKeyRestricted.php';
 
 
 class UncachedSubmissionProvider{
@@ -15,8 +16,6 @@ class UncachedSubmissionProvider{
     protected function getAllUnprocessedSubmissions(): array{
         global $providers;
         $data = $providers->canvasReader->fetchSubmissions();
-        formatted_var_dump($data);
-        // formatted_var_dump($data);
         $processed = array_map(fn($x) => new ConcreteGithublinkSubmission(
             $x["url"] ?? "",
             $x["id"],

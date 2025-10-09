@@ -8,6 +8,7 @@ class FeedbackSubmitController extends APIController {
         $feedback = $_POST['feedback'];
         $submission->submitFeedback($feedback);
         global $providers;
+        echo "Captured comments for debugging:<br>";
         formatted_var_dump($providers->submissionProvider->captured);
         return "";
     }

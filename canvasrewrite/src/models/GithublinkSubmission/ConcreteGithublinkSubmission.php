@@ -20,6 +20,9 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
         $this->canvasID = $canvasID;
         $this->submittedAt = $submittedAt;
         $this->submittingStudent = $submittingStudent;
+        
+        global $providers;
+        $providers->virtualIDsProvider->getVirtualIdFor($this);
     }
 
     public function getCanvasID(): int{ //remove
