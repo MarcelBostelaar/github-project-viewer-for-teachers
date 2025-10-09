@@ -1,0 +1,6 @@
+baseURL = "https://yourdomain.com/api/v1"
+APIKEY = "yourcanvasapikeyhere"
+veryLongTimeout = "31536000"
+dayTimeout = "86000"
+githubAuthKey = "yourgithubkeyhere(if you want more than github 50 requests in an hour, its free, go to your tokens)"
+clonetofolder = "C:/Users/You/Your//Empty/Folder/Here"
