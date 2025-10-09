@@ -32,12 +32,17 @@ function readerFromEnv(): CanvasReader{
 
 function setupGlobalDependencies(): void
 {
+    $env = parse_ini_file(__DIR__ . '/../../.env');
     $dependencies = new DependenciesContainer();
 
     $dependencies->canvasReader = readerFromEnv();
     $dependencies->githubProvider = new GithubProvider();
     $dependencies->groupProvider = new GroupProvider();
-    $dependencies->gitProvider = new GitProvider();
+    $cloneToFolder = $env['clonetofolder'] ?? null;
+    if ($cloneToFolder === null) {
+        throw new RuntimeException("clonetofolder not set in .env.");
+    }
+    $dependencies->gitProvider = new GitProvider($cloneToFolder);
     $dependencies->submissionProvider = new SubmissionProvider();
     $dependencies->sectionsProvider = new SectionsProvider();
     $dependencies->virtualIDsProvider = new VirtualIDsProvider();

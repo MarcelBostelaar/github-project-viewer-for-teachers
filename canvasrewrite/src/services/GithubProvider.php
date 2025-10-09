@@ -45,7 +45,6 @@ class DisectedURL{
 class UncachedGithubProvider{
     
     public function validateUrl(string $url) : SubmissionStatus{
-        //TODO find a different way that doesnt use headers, as it gives a session error
         //ping and return false if 404
         $parsed = DisectedURL::fromUrl($url);
         if ($parsed === null) {
@@ -53,21 +52,20 @@ class UncachedGithubProvider{
         }
         $headers = @get_headers(url: $parsed->toWebUrl());
         if ($headers && strpos($headers[0], '200') !== false) {
+            if($this->getCommitHistoryInternal($parsed) === SubmissionStatus::VALID_BUT_EMPTY){
+                return SubmissionStatus::VALID_BUT_EMPTY;
+            }
             return SubmissionStatus::VALID_URL;
         }
         return SubmissionStatus::NOTFOUND;
     }
 
     /**
-     * Summary of getCommitHistory
-     * @param string $url
-     * @return CommitHistoryEntry[]
+     * Tried to retrieve commit history. Does not depend on validate url, so can be used to check for empty repos.
+     * @param DisectedURL $url
+     * @return CommitHistoryEntry[]|SubmissionStatus
      */
-    public function getCommitHistory(string $url): array{
-        if(!$this->validateUrl($url) === SubmissionStatus::VALID_URL){
-            throw new Exception("Invalid URL, cannot get commit history");
-        }
-        $url = DisectedURL::fromUrl($url);
+    protected function getCommitHistoryInternal(DisectedURL $url) : array | SubmissionStatus {
         $data = genericCurlCall($url->toApiUrl() . "/commits");
         if(isset($data['message'])){
             if(str_contains($data['message'], "API rate limit exceeded")){
@@ -76,7 +74,7 @@ class UncachedGithubProvider{
                 ];
             }
             if(str_contains($data['message'], "Git Repository is empty")){
-                return [];
+                return SubmissionStatus::VALID_BUT_EMPTY;
             }
         }
         try{
@@ -94,11 +92,27 @@ class UncachedGithubProvider{
             ];
         }
     }
+
+    /**
+     * Summary of getCommitHistory
+     * @param string $url
+     * @return CommitHistoryEntry[]
+     */
+    public function getCommitHistory(string $url): array{
+        if(!$this->validateUrl($url) === SubmissionStatus::VALID_URL){
+            throw new Exception("Invalid URL, cannot get commit history");
+        }
+        $url = DisectedURL::fromUrl($url);
+        $result = $this->getCommitHistoryInternal($url);
+        if($result === SubmissionStatus::VALID_BUT_EMPTY){
+            return [];
+        }
+        return $result;
+    }
 }
 
 class GithubProvider extends UncachedGithubProvider{
     public function validateUrl(string $url): SubmissionStatus {
-        // $rules = new SaveKeyWrapper(new Unrestricted());
         $rules = new SaveKeyWrapper(new SetMetadataType(new Unrestricted(), "github"));
         global $veryLongTimeout, $dayTimeout;
         $result = cached_call($rules, 
@@ -120,6 +134,15 @@ class GithubProvider extends UncachedGithubProvider{
         $result = cached_call($rules, 
         $dayTimeout, fn() => parent::getCommitHistory($url),
         "GithubProvider", "getCommitHistory", $url);
+        return $result;
+    }
+
+    protected function getCommitHistoryInternal(DisectedURL $url) : array | SubmissionStatus {
+        global $dayTimeout;
+        $rules = new SetMetadataType(new Unrestricted(), "github");
+        $result = cached_call($rules, 
+        $dayTimeout, fn() => parent::getCommitHistoryInternal($url),
+        "GithubProvider", "getCommitHistoryInternal", $url);
         return $result;
     }
 }

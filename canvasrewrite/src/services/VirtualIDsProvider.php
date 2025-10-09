@@ -5,7 +5,7 @@ class VirtualIDHandler {
     private $concrete_reverse_map = [];
     private $combined_reverse_map = [];
 
-    private function findExisting(ConcreteGithublinkSubmission | CombinedGithublinkSubmission $submission): int | null {
+    private function findExisting(ConcreteGithublinkSubmission | CombinedGithublinkSubmission $submission): string | null {
         if($submission instanceof ConcreteGithublinkSubmission){
             return $this->concrete_reverse_map[$submission->getCanvasID()] ?? null;
         }
@@ -14,23 +14,28 @@ class VirtualIDHandler {
         }
     }
 
-    public function getVirtualIdFor(IGithublinkSubmission $submission) {
+    public function getVirtualIdFor(IGithublinkSubmission $submission): string {
         $existing = $this->findExisting($submission);
         if($existing !== null){
             return $existing;
         }
-        $newID = rand();
-        $this->mapping[$newID] = $submission;
+        //virtual ids are based on real canvas ids, but prefixed with vID-C- or vID-G- to avoid collisions
+        //This way they can be saved in localstorage and caching for later use
         if($submission instanceof ConcreteGithublinkSubmission){
+            //Virtual ID Concrete
+            $newID = "vID-C-" . $submission->getCanvasID();
             $this->concrete_reverse_map[$submission->getCanvasID()] = $newID;
         }
         else{
+            //Virtual ID Grouped
+            $newID = "vID-G-" . $submission->getGroup()->id;
             $this->combined_reverse_map[$submission->getGroup()->id] = $newID;
         }
+        $this->mapping[$newID] = $submission;
         return $newID;
     }
 
-    public function get(int $virtualID): IGithublinkSubmission | null {
+    public function get(string $virtualID): IGithublinkSubmission | null {
         return $this->mapping[$virtualID] ?? null;
     }
 }
@@ -54,7 +59,7 @@ class VirtualIDsProvider {
         return $this->handler->getVirtualIdFor($submission);
     }
 
-    public function get(int $virtualID): IGithublinkSubmission | null {
+    public function get(string $virtualID): IGithublinkSubmission | null {
         return $this->handler->get($virtualID);
     }
 }

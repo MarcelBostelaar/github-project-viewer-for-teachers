@@ -3,6 +3,7 @@
 enum SubmissionStatus : string{
     case MISSING = "Not submitted";
     case NOTFOUND = "Not found (private?)";
+    case VALID_BUT_EMPTY = "Empty repository";
     case VALID_URL = "Valid URL";
 }
 
@@ -31,5 +32,5 @@ interface IGithublinkSubmission{
     public function getSubmissionDate(): ?DateTime;
     public function getGroup(): ?Group;
 
-    public function getId(): int;
+    public function getId(): string;
 }

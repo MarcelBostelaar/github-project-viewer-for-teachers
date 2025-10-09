@@ -94,6 +94,33 @@ async function submitFeedback(form, submissionId, event) {
     return false; // Prevent default form submission
 }
 
+function setActiveRepo(id){
+    localStorage.setItem('lastClonedRepo', id);
+}
+
+function clone(id){
+    const formData = new FormData();
+    formData.append('id', id);
+    fetch(`/controllers/api/CloneController.php`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        setActiveRepo(id);
+        alert('Clone successful!');
+    })
+    .catch(error => {
+        console.error('Error cloning:', error);
+        alert('Failed to clone.');
+    });
+}
+
 // Initialize filtering on page load
 document.addEventListener('DOMContentLoaded', function() {
     // Set up real-time filtering

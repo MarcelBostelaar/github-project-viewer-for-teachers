@@ -117,7 +117,7 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
         return $this->submittedAt;
     }
 
-    public function getId(): int{
+    public function getId(): string{
         global $providers;
         return $providers->virtualIDsProvider->getVirtualIdFor($this);
     }

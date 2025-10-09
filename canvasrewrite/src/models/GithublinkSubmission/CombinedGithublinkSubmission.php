@@ -140,7 +140,7 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
         return $this->group;
     }
 
-    public function getId(): int{
+    public function getId(): string{
         global $providers;
         return $providers->virtualIDsProvider->getVirtualIdFor($this);
     }

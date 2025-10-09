@@ -124,7 +124,7 @@ function RenderSubmissionRow(IGithublinkSubmission $submission){
         <td><?= $submission->getSubmissionDate() ? $submission->getSubmissionDate()->format("Y-m-d H:i:s") : "Not submitted" ?></td>
         <td>
             <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
-                <button class="clone-btn" onclick="clone(<?= $id ?>)">Clone</button>
+                <button class="clone-btn" onclick="clone('<?= $id ?>')">Clone</button>
             <?php else: ?>
                 -
             <?php endif; ?>
