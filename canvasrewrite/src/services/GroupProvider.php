@@ -76,4 +76,6 @@ class GroupProvider extends UncachedGroupProvider{
         fn() => parent::getAllGroupsWithStudents(),
         "GroupProvider - getAllGroupsWithStudents");
     }
+
+    // public function
 }

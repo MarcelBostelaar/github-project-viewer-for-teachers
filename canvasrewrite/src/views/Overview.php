@@ -49,6 +49,7 @@ function statusToClass(SubmissionStatus $status): string{
  * @return void
  */
 function RenderOverview(array $Submissions){
+    global $providers;
     ?>
 
     <div class="submissions-container">
@@ -87,6 +88,7 @@ function RenderOverview(array $Submissions){
             <tbody>
                 <?php
                 foreach($Submissions as $submission){
+                    $id = $submission->getId();
                     $students = $submission->getStudents();
                     $studentNames = array_map(fn($s) => htmlspecialchars($s->name), $students);
                     
@@ -99,9 +101,6 @@ function RenderOverview(array $Submissions){
                     $allSections = array_unique($allSections);
                     $sectionsText = implode(", ", array_map('htmlspecialchars', $allSections));
                     
-                    $isGroup = $submission->getGroup() !== null;
-                    $id = $isGroup ? $submission->getGroup()->id : $students[0]->id;
-                    $idSection = $isGroup ? ("groupid=" . $submission->getGroup()->id) : ("userid=" . $students[0]->id);
                     ?>
                     <tr data-students="<?= strtolower(implode(' ', $studentNames)) ?>" 
                         data-sections="<?= strtolower($sectionsText) ?>" 
@@ -112,13 +111,7 @@ function RenderOverview(array $Submissions){
                         <td><?= $submission->getSubmissionDate() ? $submission->getSubmissionDate()->format("Y-m-d H:i:s") : "Not submitted" ?></td>
                         <td>
                             <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
-                                <?php if($isGroup): ?>
-                                    <?php $groupID = $submission->getGroup()->id; ?>
-                                    <button class="clone-btn" onclick="cloneGroup(<?= $groupID ?>)">Clone</button>
-                                <?php else: ?>
-                                    <?php $userID = $students[0]->id; ?>
-                                    <button class="clone-btn" onclick="cloneIndividual(<?= $userID ?>)">Clone</button>
-                                <?php endif; ?>
+                                <button class="clone-btn" onclick="clone(<?= $id ?>)">Clone</button>
                             <?php else: ?>
                                 -
                             <?php endif; ?>
@@ -127,19 +120,19 @@ function RenderOverview(array $Submissions){
                             <div class="feedback-section">
                                 <form method="post">
                                     <input type="hidden" name="action" value="addfeedback"/>
-                                    <input type="hidden" name="<?= $isGroup ? "groupid" : 'userid' ?>" value="<?=$id?>"/>
+                                    <input type="hidden" name="id" value="<?=$id?>"/>
                                     <textarea name="feedback" rows="4" cols="50" placeholder="Enter feedback here..." required></textarea><br/>
                                     <button type="submit">Add Feedback</button>
                                 </form>
                                 <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
-                                    <div postload="<?="?action=feedback&$idSection"?>">Loading feedback...</div>
+                                    <div postload="<?="?action=feedback&id=$id"?>">Loading feedback...</div>
                                 <?php endif; ?>
                             </div>
                         </td>
                         <td>
                             <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
                                 <div class="commits-section">
-                                    <div postload="<?="?action=commithistory&$idSection"?>">Loading commit history...</div>
+                                    <div postload="<?="?action=commithistory&id=$id"?>">Loading commit history...</div>
                                 </div>
                             <?php else: ?>
                                 -

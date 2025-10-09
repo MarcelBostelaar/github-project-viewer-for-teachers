@@ -5,7 +5,9 @@ require_once __DIR__ . '/GitProvider.php';
 require_once __DIR__ . '/SubmissionProvider.php';
 require_once __DIR__ . '/GroupProvider.php';
 require_once __DIR__ . '/SectionsProvider.php';
+require_once __DIR__ . '/VirtualIDsProvider.php';
 require_once __DIR__ . '/../monkeypatch/MonkeyPatchedCanvasReader.php';
+require_once __DIR__ . '/../debug/CaptureAndPreventSubmissionFeedback.php';
 
 
 class DependenciesContainer
@@ -16,6 +18,7 @@ class DependenciesContainer
     public SubmissionProvider $submissionProvider;
     public GroupProvider $groupProvider;
     public SectionsProvider $sectionsProvider;
+    public VirtualIDsProvider $virtualIDsProvider;
 }
 
 function readerFromEnv(): CanvasReader{
@@ -37,9 +40,10 @@ function setupGlobalDependencies(): void
     $dependencies->gitProvider = new GitProvider();
     $dependencies->submissionProvider = new SubmissionProvider();
     $dependencies->sectionsProvider = new SectionsProvider();
+    $dependencies->virtualIDsProvider = new VirtualIDsProvider();
     
     //Debug
-
+    $dependencies->submissionProvider = new CaptureAndPreventSubmissionFeedback();
 
     //Money patch
     $dependencies->canvasReader = MonkeyPatchedCanvasReader::FromCanvasReader($dependencies->canvasReader);

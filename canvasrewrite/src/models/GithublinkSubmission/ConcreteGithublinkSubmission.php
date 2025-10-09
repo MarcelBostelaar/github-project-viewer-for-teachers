@@ -14,14 +14,12 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
     private DateTime | null $submittedAt;
     private Student $submittingStudent;
     private int $canvasID;
-    private ?Group $group;
 
-    public function __construct(string $url, int $canvasID, Student $submittingStudent, ?Group $group, ?DateTime $submittedAt = null){
+    public function __construct(string $url, int $canvasID, Student $submittingStudent, ?DateTime $submittedAt = null){
         $this->url = $url;
         $this->canvasID = $canvasID;
         $this->submittedAt = $submittedAt;
         $this->submittingStudent = $submittingStudent;
-        $this->group = $group;
     }
 
     public function getCanvasID(): int{ //remove
@@ -29,7 +27,16 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
     }
 
     public function getGroup(): ?Group{
-        return $this->group;
+        global $providers;
+        $lookup = $providers->groupProvider->getStudentGroupLookup();
+        $groups = $lookup->getItem($this->submittingStudent);
+        if(count($groups) == 0){
+            return null;
+        }
+        if(count($groups) > 1){
+            throw new Exception("Student in multiple groups, should not be possible");
+        }
+        return $groups[0];
     }
 
     public function getUrl(): string{
@@ -105,5 +112,10 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
 
     public function getSubmissionDate(): ?DateTime{
         return $this->submittedAt;
+    }
+
+    public function getId(): int{
+        global $providers;
+        return $providers->virtualIDsProvider->getVirtualIdFor($this);
     }
 }

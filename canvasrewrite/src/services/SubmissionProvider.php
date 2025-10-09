@@ -15,12 +15,12 @@ class UncachedSubmissionProvider{
     protected function getAllUnprocessedSubmissions(): array{
         global $providers;
         $data = $providers->canvasReader->fetchSubmissions();
+        formatted_var_dump($data);
         // formatted_var_dump($data);
         $processed = array_map(fn($x) => new ConcreteGithublinkSubmission(
             $x["url"] ?? "",
             $x["id"],
             new Student($x["user"]["id"], $x["user"]["name"]),
-            $x["group"]["id"] ? new Group($x["group"]["id"], $x["group"]["name"]) : null,
             $x["submitted_at"] ? new DateTime($x["submitted_at"]) : null
         ), $data);
         return $processed;
@@ -80,7 +80,7 @@ class UncachedSubmissionProvider{
         return array_merge($without_groups, $in_groups);
     }
 
-    public function getSubmissionForGroupID(string $groupID): IGithublinkSubmission | null{
+    public function getSubmissionForGroupID(int $groupID): IGithublinkSubmission | null{
         $all = $this->getAllSubmissions();
         foreach($all as $submission){
             if($submission->getGroup() !== null && $submission->getGroup()->id == $groupID){
@@ -90,7 +90,7 @@ class UncachedSubmissionProvider{
         return null;
     }
 
-    public function getSubmissionForUserID(string $userID): IGithublinkSubmission | null{
+    public function getSubmissionForUserID(int $userID): ConcreteGithublinkSubmission | null{
         $all = $this->getAllSubmissions();
         foreach($all as $submission){
             if(array_any($submission->getStudents(), fn($x) => $x->id == $userID)){
@@ -110,6 +110,13 @@ class UncachedSubmissionProvider{
         ];
     }
 
+    /**
+     * Summary of submitFeedback
+     * @param string $feedback
+     * @param int $submissionID A submission id for an existing individual submission, not a group submission id
+     * @throws \Exception
+     * @return never
+     */
     public function submitFeedback(string $feedback, int $submissionID): void{
         //TODO implement
         throw new Exception("Not implemented");
@@ -148,13 +155,13 @@ class SubmissionProvider extends UncachedSubmissionProvider{
         fn() => parent::getAllSubmissions(),
         "SubmissionProvider - getAllSubmissions");
     }
-    public function getSubmissionForGroupID(string $groupID): IGithublinkSubmission{
+    public function getSubmissionForGroupID(int $groupID): IGithublinkSubmission | null{
         global $sharedCacheTimeout;
         return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
         fn() => parent::getSubmissionForGroupID($groupID),
         "SubmissionProvider - getSubmissionForGroupID", $groupID);
     }
-    public function getSubmissionForUserID(string $userID): IGithublinkSubmission{
+    public function getSubmissionForUserID(int $userID): ConcreteGithublinkSubmission | null{
         global $sharedCacheTimeout;
         return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
         fn() => parent::getSubmissionForUserID($userID),

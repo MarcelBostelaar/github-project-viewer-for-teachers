@@ -42,7 +42,7 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
         }
     }
 
-    private static function submitSingleFeedbackToChild(ConcreteGithublinkSubmission $child, array $encounteredGroups, string $feedback): void{
+    private static function submitSingleFeedbackToChild(ConcreteGithublinkSubmission $child, array &$encounteredGroups, string $feedback): void{
         $childSubmissionGroup = $child->getGroup();
         if($childSubmissionGroup === null){ //Submission without group, always submit feedback with name of group. No risk of duplicate submission.
             $child->submitFeedback($feedback);
@@ -135,5 +135,10 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
 
     public function getGroup(): ?Group{
         return $this->group;
+    }
+
+    public function getId(): int{
+        global $providers;
+        return $providers->virtualIDsProvider->getVirtualIdFor($this);
     }
 }

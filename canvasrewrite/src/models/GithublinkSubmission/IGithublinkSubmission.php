@@ -30,4 +30,6 @@ interface IGithublinkSubmission{
     public function getStatus(): SubmissionStatus;
     public function getSubmissionDate(): ?DateTime;
     public function getGroup(): ?Group;
+
+    public function getId(): int;
 }

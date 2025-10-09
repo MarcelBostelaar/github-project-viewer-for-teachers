@@ -9,7 +9,7 @@ class MaximumAPIKeyRestrictions extends AGeneralCacheRules{
     protected function serializeCanvasReader(){
         global $providers;
         $canvasReader = $providers->canvasReader;
-        return "CanvasReader" . $canvasReader->getBaseURL() . $canvasReader->getCourseURL() . $canvasReader->getApiKey();
+        return "CanvasReader" . $canvasReader->getBaseURL() . $canvasReader->getCourseURL() . $canvasReader->getApiKey() . $canvasReader->getAssignmentID();
     }
     public function getValidity(): bool{
         return true; //Generated key always valid
