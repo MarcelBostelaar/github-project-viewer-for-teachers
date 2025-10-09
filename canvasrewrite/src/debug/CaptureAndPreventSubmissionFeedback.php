@@ -2,7 +2,7 @@
 
 class CaptureAndPreventSubmissionFeedback extends SubmissionProvider {
     public array $captured = [];
-    public function submitFeedback(string $feedback, int $submissionID): void {
+    public function submitFeedback(string $feedback, ConcreteGithublinkSubmission $submissionID): void {
         global $providers;
         // formatted_var_dump($providers->submissionProvider->getAllUnprocessedSubmissions());
         $submissions = $providers->submissionProvider->getAllUnprocessedSubmissions();

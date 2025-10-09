@@ -43,7 +43,7 @@ function setupGlobalDependencies(): void
     $dependencies->virtualIDsProvider = new VirtualIDsProvider();
     
     //Debug
-    $dependencies->submissionProvider = new CaptureAndPreventSubmissionFeedback();
+    // $dependencies->submissionProvider = new CaptureAndPreventSubmissionFeedback();
 
     //Money patch
     $dependencies->canvasReader = MonkeyPatchedCanvasReader::FromCanvasReader($dependencies->canvasReader);

@@ -76,3 +76,43 @@ function curlCall($url, $apiKey): array {
     // echo "Total data: " . count($data) . "<br>";
     return $data;
 }
+function putCurlCall($url, $apiKey, $field, $data): void {
+    // echo $url . "<br>";
+    // echo "Fetching URL: $url<br>";
+    // Initialize cURL
+    $ch = curl_init($url);
+
+    // Set headers
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: Bearer $apiKey"
+    ]);
+
+    // Set the HTTP method to PUT
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+    $encoded = http_build_query([$field => $data]);
+    // Prepare JSON data
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $encoded);
+
+    // Return response instead of outputting
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    // Execute
+    $response = curl_exec($ch);
+
+    // Handle errors
+    if (curl_errno($ch)) {
+        echo "cURL Error: " . curl_error($ch);
+        throw new Exception("cURL Error: " . curl_error($ch));
+    } else {
+        $data = json_decode($response, true);
+    }
+
+    // Close
+    curl_close($ch);
+    if(isset($data["errors"])){
+        $errors = "URL: $url\n";
+        foreach($data["errors"] as $message){
+            $errors .= $message["message"] . "\n";
+        }
+        throw new Exception($errors);
+    }
+}

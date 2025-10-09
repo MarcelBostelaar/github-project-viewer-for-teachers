@@ -65,7 +65,7 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
      */
     public function getFeedback(): array{
         global $providers;
-        return $providers->submissionProvider->getFeedbackForSubmission($this->canvasID);
+        return $providers->submissionProvider->getFeedbackForSubmission($this->submittingStudent->id);
     }
 
     /**
@@ -76,7 +76,7 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
      */
     public function submitFeedback(string $feedback): void{
         global $providers;
-        $providers->submissionProvider->submitFeedback($feedback, $this->canvasID);
+        $providers->submissionProvider->submitFeedback($feedback, $this);
     }
 
     /**

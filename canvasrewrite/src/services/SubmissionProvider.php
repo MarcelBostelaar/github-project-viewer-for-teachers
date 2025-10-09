@@ -101,12 +101,15 @@ class UncachedSubmissionProvider{
         return null;
     }
 
-    public function getFeedbackForSubmission(int $submissionID): array{
-        //TODO implement
-        return [
-            new SubmissionFeedback("Kim", new DateTime("2024-01-01 12:00:00"), "Good job!"),
-            new SubmissionFeedback("Josh", new DateTime("2024-01-02 12:00:00"), "Please fix the bugs."),
-        ];
+    public function getFeedbackForSubmission(int $userID): array{
+        global $providers;
+        $data = $providers->canvasReader->fetchSubmissionComments($userID);
+        $comments = $data["submission_comments"];
+        return array_map(fn($x) => new SubmissionFeedback(
+            $x["author_name"],
+            new DateTime($x["created_at"]),
+            $x["comment"]
+        ), $comments);
     }
 
     /**
@@ -116,9 +119,9 @@ class UncachedSubmissionProvider{
      * @throws \Exception
      * @return never
      */
-    public function submitFeedback(string $feedback, int $submissionID): void{
-        //TODO implement
-        throw new Exception("Not implemented");
+    public function submitFeedback(string $feedback, ConcreteGithublinkSubmission $submission): void{
+        global $providers;
+        $providers->canvasReader->putCommentToSubmission($submission->getStudent()->id, $feedback);
     }
 }
 
@@ -167,10 +170,19 @@ class SubmissionProvider extends UncachedSubmissionProvider{
         "SubmissionProvider - getSubmissionForUserID", $userID);
     }
 
-    public function getFeedbackForSubmission(int $submissionID): array{
+    public function getFeedbackForSubmission(int $userID): array{
         global $sharedCacheTimeout;
-        return cached_call(new MaximumAPIKeyRestrictions(), $sharedCacheTimeout,
-        fn() => parent::getFeedbackForSubmission($submissionID),
-        "SubmissionProvider - getFeedbackForSubmission", $submissionID);
+        return cached_call(
+            //Set metadata so we can invalidate the submission feedback cache when we post new feedback
+            new SetMetadata( new MaximumAPIKeyRestrictions(), ["comment_userID" => $userID]), 
+            $sharedCacheTimeout,
+        fn() => parent::getFeedbackForSubmission($userID),
+        "SubmissionProvider - getFeedbackForSubmission", $userID);
+    }
+
+    public function submitFeedback(string $feedback, ConcreteGithublinkSubmission $submission): void{
+        parent::submitFeedback($feedback, $submission);
+        //Invalidate cache for feedback for this submission
+        clearCacheForMetadata(fn($data) => isset($data["comment_userID"]) && $data["comment_userID"] === $submission->getStudent()->id);
     }
 }

@@ -79,6 +79,17 @@ class UncachedCanvasReader{
         $data = curlCall($url, $this->apiKey);
         return $data;
     }
+
+    public function putCommentToSubmission(int $userID, string $commentText){
+        $url = "$this->baseURL/courses/$this->courseID/assignments/$this->assignmentID/submissions/$userID";
+        putCurlCall($url, $this->apiKey, "comment[text_comment]", $commentText);
+    }
+
+    public function fetchSubmissionComments(int $userID){
+        $url = "$this->baseURL/courses/$this->courseID/assignments/$this->assignmentID/submissions/$userID?include[]=submission_comments";
+        $data = curlCall($url, $this->apiKey);
+        return $data;
+    }
 }
 
 class CanvasReader extends UncachedCanvasReader{
