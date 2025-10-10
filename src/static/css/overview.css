@@ -84,6 +84,13 @@ textarea{
     margin: 5px;
 }
 
+.commit_message.clickable{
+    background-color: lightgray;
+}
+.commit_message.clickable:hover{
+    background-color: grey;
+}
+
 .author{
     margin-top: 0;
     margin-bottom: 5px;

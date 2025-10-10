@@ -43,10 +43,11 @@ function timeAgo(DateTime $past): string {
  * @param CommitHistoryEntry[] $commits
  * @return void
  */
-function renderCommitHistory(array $commits, $limit){
+function renderCommitHistory(array $commits, $limit, $id){
     usort($commits, fn($a, $b) => $b->date <=> $a->date);
     $cutOff = max(0, count($commits) - $limit);
     $commits = array_slice($commits, 0, $limit);
+    echo '<div class="commits-section">';
     foreach($commits as $commit){
         echo "<div class='commit_message'>";
         echo "<h5 class=author>" . timeAgo($commit->date) . " by " . htmlspecialchars($commit->author) . ":</h5>";
@@ -54,8 +55,10 @@ function renderCommitHistory(array $commits, $limit){
         echo "</div>";
     }
     if($cutOff > 0){
-        echo "<div class='commit_message'>... and $cutOff more.</div>";
+        $newCount = $limit + 10;
+        echo "<div class='commit_message clickable' onclick='LoadMoreCommits(this, $newCount, `$id`)'>... and $cutOff more.</div>";
     }
+    echo "</div>";
 }
 
 function statusToClass(SubmissionStatus $status): string{
@@ -154,8 +157,8 @@ function RenderSubmissionRow(IGithublinkSubmission $submission, string $baseURL)
         </td>
         <td>
             <?php if($submission->getStatus() == SubmissionStatus::VALID_URL): ?>
-                <div class="commits-section">
-                    <div postload="<?="$baseURL&action=commithistory&id=$id"?>">Loading commit history...</div>
+                <div class="commits-section" postload="<?="$baseURL&action=commithistory&id=$id"?>">
+                    <div>Loading commit history...</div>
                 </div>
             <?php else: ?>
                 -

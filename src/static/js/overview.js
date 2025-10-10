@@ -175,6 +175,14 @@ function clearCache(type = 'all'){
     });
 }
 
+function LoadMoreCommits(callingElement, newLimit, id){
+    let parent = callingElement.parentNode;
+    let baseURL = window.location.href;
+    parent.setAttribute("postload", `${baseURL}&action=commithistory&id=${id}&limit=${newLimit}`);
+    callingElement.innerHTML = "Loading more commits";
+    findMarkedForPostLoading(document);
+}
+
 // Initialize filtering on page load
 document.addEventListener('DOMContentLoaded', function() {
     // Set up real-time filtering

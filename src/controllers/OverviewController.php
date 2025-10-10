@@ -49,7 +49,9 @@ class OverviewController extends BaseController {
     }
 
     public function commitHistory(){
-        renderCommitHistory($this->getSubmissionFromRequest()->getCommitHistory(), 8);
+        $limit = $_GET["limit"] ?? 8;
+        $submission = $this->getSubmissionFromRequest();
+        renderCommitHistory($submission->getCommitHistory(), $limit, $submission->getId());
     }
 
     public function submissionRow(){
