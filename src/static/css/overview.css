@@ -50,6 +50,7 @@
 .status-valid { color: green; font-weight: bold; }
 .status-missing { color: red; font-weight: bold; }
 .status-notfound { color: orange; font-weight: bold; }
+.status-empty { color: orange; font-weight: bold; }
 .clone-btn {
     padding: 5px 10px;
     margin: 2px;

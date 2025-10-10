@@ -118,16 +118,19 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
     }
 
     public function getStatus(): SubmissionStatus{
-        $didFindInvalid = false;
+        $validationHierarchy = [
+            SubmissionStatus::MISSING,
+            SubmissionStatus::NOTFOUND,
+            SubmissionStatus::VALID_BUT_EMPTY,
+            SubmissionStatus::VALID_URL,
+        ];
+        $highestFind = SubmissionStatus::MISSING;
         foreach($this->children as $child){
-            if($child->getStatus() === SubmissionStatus::VALID_URL){
-                return SubmissionStatus::VALID_URL;
-            }
-            if($child->getStatus() === SubmissionStatus::NOTFOUND){
-                $didFindInvalid = true;
+            if(array_search($child->getStatus(), $validationHierarchy) > array_search($highestFind, $validationHierarchy)){
+                $highestFind = $child->getStatus();
             }
         }
-        return $didFindInvalid ? SubmissionStatus::NOTFOUND : SubmissionStatus::MISSING;
+        return $highestFind;
     }
 
     public function getSubmissionDate(): ?DateTime{

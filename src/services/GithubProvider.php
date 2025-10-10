@@ -64,18 +64,19 @@ class UncachedGithubProvider{
      */
     protected function getCommitHistoryInternal(DisectedURL $url) : array | SubmissionStatus {
         $data = githubCurlCall($url->toApiUrl() . "/commits");
-        if(isset($data['status_code']) && $data['status_code'] === 404){
-            return SubmissionStatus::NOTFOUND;
-        }
-        if(isset($data['message'])){
+        if(isset($data['status'])){
+            if($data["status"] == 404){
+                return SubmissionStatus::NOTFOUND;
+            }
+            if(str_contains($data['message'], "Git Repository is empty")){
+                return SubmissionStatus::VALID_BUT_EMPTY;
+            }
             if(str_contains($data['message'], "API rate limit exceeded")){
                 return [
                     new CommitHistoryEntry("GitHub API rate limit exceeded. Please try again later or set authentication.", "System", new DateTime())
                 ];
             }
-            if(str_contains($data['message'], "Git Repository is empty")){
-                return SubmissionStatus::VALID_BUT_EMPTY;
-            }
+            throw new Exception("Error, status code:" . json_encode($data));
         }
         try{
             $history = array_map(function($commit) {
