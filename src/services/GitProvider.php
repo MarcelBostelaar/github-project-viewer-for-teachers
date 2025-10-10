@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/GithubProvider.php';
+require_once __DIR__ . '/interfaces/IGitProvider.php';
 
-class GitProvider{
+class GitProvider implements IGitProvider{
     private string $folderpath;
     
     public function __construct(string $folderpath) {

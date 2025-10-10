@@ -6,19 +6,26 @@ require_once __DIR__ . '/SubmissionProvider.php';
 require_once __DIR__ . '/GroupProvider.php';
 require_once __DIR__ . '/SectionsProvider.php';
 require_once __DIR__ . '/VirtualIDsProvider.php';
+require_once __DIR__ . '/interfaces/ICanvasReader.php';
+require_once __DIR__ . '/interfaces/IGithubProvider.php';
+require_once __DIR__ . '/interfaces/IGitProvider.php';
+require_once __DIR__ . '/interfaces/ISubmissionProvider.php';
+require_once __DIR__ . '/interfaces/IGroupProvider.php';
+require_once __DIR__ . '/interfaces/ISectionsProvider.php';
+require_once __DIR__ . '/interfaces/IVirtualIDsProvider.php';
 require_once __DIR__ . '/../monkeypatch/MonkeyPatchedCanvasReader.php';
 require_once __DIR__ . '/../debug/CaptureAndPreventSubmissionFeedback.php';
 
 
 class DependenciesContainer
 {
-    public CanvasReader $canvasReader;
-    public GithubProvider $githubProvider;
-    public GitProvider $gitProvider;
-    public SubmissionProvider $submissionProvider;
-    public GroupProvider $groupProvider;
-    public SectionsProvider $sectionsProvider;
-    public VirtualIDsProvider $virtualIDsProvider;
+    public ICanvasReader $canvasReader;
+    public IGithubProvider $githubProvider;
+    public IGitProvider $gitProvider;
+    public ISubmissionProvider $submissionProvider;
+    public IGroupProvider $groupProvider;
+    public ISectionsProvider $sectionsProvider;
+    public IVirtualIDsProvider $virtualIDsProvider;
 }
 
 function readerFromEnv($courseID, $assignmentID): CanvasReader{

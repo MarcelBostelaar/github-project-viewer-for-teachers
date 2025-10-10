@@ -5,8 +5,9 @@ require_once __DIR__ . '/../util/Caching/Caching.php';
 require_once __DIR__ . '/../util/Constants.php';
 require_once __DIR__ . '/../util/CanvasCurlCalls.php';
 require_once __DIR__ . '/../util/caching/CacheRules.php';
+require_once __DIR__ . '/interfaces/ICanvasReader.php';
 
-class UncachedCanvasReader{
+class UncachedCanvasReader implements ICanvasReader{
     protected $apiKey;
     protected $courseURL;
     protected $courseID;
@@ -41,6 +42,10 @@ class UncachedCanvasReader{
 
     public function getAssignmentID(){
         return $this->assignmentID;
+    }
+
+    public function getCourseID(){
+        return $this->courseID;
     }
 
     public function fetchSections(){

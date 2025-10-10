@@ -5,9 +5,10 @@ require_once __DIR__ . '/../models//GithublinkSubmission/CombinedGithublinkSubmi
 require_once __DIR__ . '/../util/UtilFuncs.php';
 require_once __DIR__ . '/../util/caching/MaximumAPIKeyRestrictions.php';
 require_once __DIR__ . '/../util/caching/CourseAPIKeyRestricted.php';
+require_once __DIR__ . '/interfaces/ISubmissionProvider.php';
 
 
-class UncachedSubmissionProvider{
+class UncachedSubmissionProvider implements ISubmissionProvider{
 
     /**
      * Gets all submissions without processing them into group submissions

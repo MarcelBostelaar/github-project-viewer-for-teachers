@@ -4,6 +4,7 @@ require_once __DIR__ . '/../util/caching/SaveKeyWrapper.php';
 require_once __DIR__ . '/../util/caching/Unrestricted.php';
 require_once __DIR__ . '/../util/caching/SetMetadataType.php';
 require_once __DIR__ . '/../util/GithubCurlCalls.php';
+require_once __DIR__ . '/interfaces/IGithubProvider.php';
 
 class DisectedURL{
     public string $owner;
@@ -42,7 +43,7 @@ class DisectedURL{
     }
 }
 
-class UncachedGithubProvider{
+class UncachedGithubProvider implements IGithubProvider{
     
     public function validateUrl(string $url) : SubmissionStatus{
         //ping and return false if 404

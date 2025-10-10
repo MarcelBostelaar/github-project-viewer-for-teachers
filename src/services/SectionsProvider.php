@@ -1,5 +1,7 @@
 <?php
-class UncachedSectionsProvider{
+require_once __DIR__ . '/interfaces/ISectionsProvider.php';
+
+class UncachedSectionsProvider implements ISectionsProvider{
     
     /**
      * Summary of getSectionsForStudent

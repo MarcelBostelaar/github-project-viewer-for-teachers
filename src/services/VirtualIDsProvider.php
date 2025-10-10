@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/interfaces/IVirtualIDsProvider.php';
 
 class VirtualIDHandler {
     private $mapping = [];
@@ -40,7 +41,7 @@ class VirtualIDHandler {
     }
 }
 
-class VirtualIDsProvider {
+class VirtualIDsProvider implements IVirtualIDsProvider {
     private VirtualIDHandler $handler;
     private const CACHEKEY = "virtual_ids_provider_instance";
     public function __construct() {
