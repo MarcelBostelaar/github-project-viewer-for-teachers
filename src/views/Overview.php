@@ -49,10 +49,11 @@ function renderCommitHistory(array $commits, $limit, $id){
     $commits = array_slice($commits, 0, $limit);
     echo '<div class="commits-section">';
     foreach($commits as $commit){
-        echo "<div class='commit_message'>";
+        $url = $commit->url ? "href='" . htmlspecialchars($commit->url) . "'" : "";
+        echo "<a $url><div class='commit_message'>";
         echo "<h5 class=author>" . timeAgo($commit->date) . " by " . htmlspecialchars($commit->author) . ":</h5>";
         echo nl2br(htmlspecialchars($commit->description));
-        echo "</div>";
+        echo "</div></a>";
     }
     if($cutOff > 0){
         $newCount = $limit + 10;

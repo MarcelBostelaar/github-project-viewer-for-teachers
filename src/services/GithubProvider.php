@@ -73,23 +73,25 @@ class UncachedGithubProvider{
             }
             if(str_contains($data['message'], "API rate limit exceeded")){
                 return [
-                    new CommitHistoryEntry("GitHub API rate limit exceeded. Please try again later or set authentication.", "System", new DateTime())
+                    new CommitHistoryEntry("GitHub API rate limit exceeded. Please try again later or set authentication.", "System", new DateTime(), "")
                 ];
             }
             throw new Exception("Error, status code:" . json_encode($data));
         }
         try{
             $history = array_map(function($commit) {
+                // formatted_var_dump($commit);
                 $commitDescription = $commit['commit']['message'];
                 $commitDate = $commit['commit']["author"]['date'];
                 $commitAuthor = $commit['commit']["author"]['name'];
-                return new CommitHistoryEntry($commitDescription, $commitAuthor, new DateTime($commitDate));
+                $commitUrl = $commit['html_url'];
+                return new CommitHistoryEntry($commitDescription, $commitAuthor, new DateTime($commitDate), $commitUrl);
             }, $data);
             return $history;
         }catch(Error $e){
             $data = json_encode($data);
             return [
-                new CommitHistoryEntry("Error fetching commit history: " . $e->getMessage() . "<br><pre>$data</pre>", "System", new DateTime())
+                new CommitHistoryEntry("Error fetching commit history: " . $e->getMessage() . "<br><pre>$data</pre>", "System", new DateTime(), "")
             ];
         }
     }

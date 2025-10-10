@@ -87,8 +87,14 @@ textarea{
 .commit_message.clickable{
     background-color: lightgray;
 }
-.commit_message.clickable:hover{
+.commit_message:hover{
     background-color: grey;
+    cursor: pointer;
+}
+a .commit_message,
+a:has(.commit_message) {
+    color: black;
+    text-decoration: none;
 }
 
 .author{
