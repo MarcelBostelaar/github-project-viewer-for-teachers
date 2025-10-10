@@ -197,6 +197,7 @@ function RenderOverview(array $Submissions, $baseURL){
                     <option value="<?= SubmissionStatus::VALID_URL->value ?>">Valid URL</option>
                     <option value="<?= SubmissionStatus::MISSING->value ?>">Not submitted</option>
                     <option value="<?= SubmissionStatus::NOTFOUND->value ?>">Not found (private?)</option>
+                    <option value="<?= SubmissionStatus::VALID_BUT_EMPTY->value ?>">Empty repository</option>
                 </select>
             </div>
         </div>
