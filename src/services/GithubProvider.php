@@ -50,14 +50,11 @@ class UncachedGithubProvider{
         if ($parsed === null) {
             return SubmissionStatus::MISSING;
         }
-        $headers = @get_headers(url: $parsed->toWebUrl());
-        if ($headers && strpos($headers[0], '200') !== false) {
-            if($this->getCommitHistoryInternal($parsed) === SubmissionStatus::VALID_BUT_EMPTY){
-                return SubmissionStatus::VALID_BUT_EMPTY;
-            }
-            return SubmissionStatus::VALID_URL;
+        $retrieved_commits = $this->getCommitHistoryInternal($parsed);
+        if($retrieved_commits instanceof SubmissionStatus){
+            return $retrieved_commits;
         }
-        return SubmissionStatus::NOTFOUND;
+        return SubmissionStatus::VALID_URL;
     }
 
     /**
@@ -66,7 +63,10 @@ class UncachedGithubProvider{
      * @return CommitHistoryEntry[]|SubmissionStatus
      */
     protected function getCommitHistoryInternal(DisectedURL $url) : array | SubmissionStatus {
-        $data = genericCurlCall($url->toApiUrl() . "/commits");
+        $data = githubCurlCall($url->toApiUrl() . "/commits");
+        if(isset($data['status_code']) && $data['status_code'] === 404){
+            return SubmissionStatus::NOTFOUND;
+        }
         if(isset($data['message'])){
             if(str_contains($data['message'], "API rate limit exceeded")){
                 return [

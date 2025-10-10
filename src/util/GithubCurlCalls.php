@@ -1,5 +1,5 @@
 <?php
-function genericCurlCall($url): array {
+function githubCurlCall($url): array {
     // echo "Fetching URL: $url<br>";
     // Initialize cURL
     $ch = curl_init($url);
@@ -22,6 +22,9 @@ function genericCurlCall($url): array {
     // Execute
     $response = curl_exec($ch);
 
+    // Get HTTP status code
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
     // Handle errors
     if (curl_errno($ch)) {
         echo "cURL Error: " . curl_error($ch);
@@ -34,6 +37,10 @@ function genericCurlCall($url): array {
     // Close
     curl_close($ch);
     
+    // If status code is not 200, return the code
+    if ($httpCode !== 200) {
+        return ['status_code' => $httpCode];
+    }
     // echo "Total data: " . count($data) . "<br>";
     return $data;
 }
