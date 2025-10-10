@@ -183,6 +183,6 @@ class SubmissionProvider extends UncachedSubmissionProvider{
     public function submitFeedback(string $feedback, ConcreteGithublinkSubmission $submission): void{
         parent::submitFeedback($feedback, $submission);
         //Invalidate cache for feedback for this submission
-        clearCacheForMetadata(fn($data) => isset($data["comment_userID"]) && $data["comment_userID"] === $submission->getStudent()->id);
+        clearCacheForMetadata(fn($data) => isset($data["comment_userID"]) && $data["comment_userID"] == $submission->getStudent()->id);
     }
 }

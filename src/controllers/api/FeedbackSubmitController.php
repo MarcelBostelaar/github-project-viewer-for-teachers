@@ -3,6 +3,7 @@
 require_once __DIR__ . '/APIController.php';
 
 class FeedbackSubmitController extends APIController {
+    protected $debug_keep_output = true;
     public function handle() {
         $submission = $this->getSubmissionFromRequest(false);
         $feedback = $_POST['feedback'];
@@ -13,3 +14,6 @@ class FeedbackSubmitController extends APIController {
         return "";
     }
 }
+
+$x = new FeedbackSubmitController();
+$x->index();

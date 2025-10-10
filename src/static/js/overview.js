@@ -30,17 +30,14 @@ function filterTable() {
  * @param {Event} event - The form submission event
  * @returns {boolean} - Always returns false to prevent default form submission
  */
-async function submitFeedback(form, submissionId, event) {
-    // Prevent default form submission
-    event.preventDefault();
-    
-    const submitButton = form.querySelector('button[type="submit"]');
-    const textArea = form.querySelector('textarea[name="feedback"]');
-    const originalButtonText = submitButton.textContent;
+async function submitFeedback(button, submissionId) {
+    let container = button.parentNode;
+    const textArea = container.querySelector('textarea[name="feedback"]');
+    const originalButtonText = button.textContent;
     
     // Disable form during submission
-    submitButton.disabled = true;
-    submitButton.textContent = 'Submitting...';
+    button.disabled = true;
+    button.textContent = 'Submitting...';
     textArea.disabled = true;
     const feedbackText = textArea.value.trim();
     if (!feedbackText) {
@@ -54,24 +51,24 @@ async function submitFeedback(form, submissionId, event) {
         formData.append('action', 'addfeedback');
         formData.append('id', submissionId);
         formData.append('feedback', feedbackText);
-        console.log('Submitting feedback:', formData);
         
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
         
-        
+        let currentCourse = urlParams.get('course');
+        let currentAssignment = urlParams.get('assignment');
         // Refresh the feedback section to show the new feedback
-        const feedbackDiv = form.parentNode.querySelector('.feedback-container');
-        if (feedbackDiv) {
-            let currentCourse = urlParams.get('course');
-            let currentAssignment = urlParams.get('assignment');
-            let tempdiv = document.createElement('div');
-            tempdiv.innerHTML = 'Reloading feedback...';
-            tempdiv.setAttribute('postload', `?course=${currentCourse}&assignment=${currentAssignment}&action=feedback&id=${submissionId}`);
-            feedbackDiv.replaceChildren(tempdiv);
-            // Trigger postloading for this specific element
-        }
+        const feedbackDiv = container.parentNode.querySelector('.feedback-container');
+    
+        let tempdiv = document.createElement('div');
+        tempdiv.innerHTML = 'Reloading feedback...';
+        tempdiv.setAttribute('postload', `?course=${currentCourse}&assignment=${currentAssignment}&action=feedback&id=${submissionId}`);
+        feedbackDiv.replaceWith(tempdiv);
+        // Trigger postloading for this specific element
+    
         
         // Submit the feedback
-        const response = await fetch(window.location.href, {
+        const response = await fetch(`/controllers/api/FeedbackSubmitController.php?course=${currentCourse}&assignment=${currentAssignment}`, {
             method: 'POST',
             body: formData
         });
@@ -82,14 +79,14 @@ async function submitFeedback(form, submissionId, event) {
         
         // Clear the textarea on successful submission
         textArea.value = '';
-        await findMarkedForPostLoading(document);
-        submitButton.textContent = originalButtonText;
+        findMarkedForPostLoading(document);
+        button.textContent = originalButtonText;
         
     } catch (error) {
         console.error('Error submitting feedback:', error);
     } finally {
         // Re-enable form
-        submitButton.disabled = false;
+        button.disabled = false;
         textArea.disabled = false;
     }
     
@@ -101,7 +98,6 @@ function refreshActiveRepoVisuals(){
     if(!lastClonedRepo) return;
 
     const rows = document.querySelectorAll('#submissions-table tbody tr');
-    console.log(rows);
     rows.forEach(row => {
         if(row.getAttribute('data-id') == lastClonedRepo){
             row.classList.add('active-repo');

@@ -7,12 +7,14 @@
  */
 function renderFeedback(array $feedbacks){
     usort($feedbacks, fn($a, $b) => $b->date <=> $a->date);
+    echo "<div class=feedback-container>";
     foreach($feedbacks as $feedback){
         echo "<div class='feedback_entry'>";
         echo "<h5 class=author>$feedback->feedbackGiver - " . $feedback->date->format("Y-m-d H:i:s") . ":</h5>";
         echo nl2br(htmlspecialchars($feedback->comment));
         echo "</div>";
     }
+    echo "</div>";
 }
 
 function timeAgo(DateTime $past): string {
@@ -147,12 +149,12 @@ function RenderSubmissionRow(IGithublinkSubmission $submission, string $baseURL)
         </td>
         <td>
             <div class="feedback-section">
-                <form method="post" onsubmit="return submitFeedback(this, <?=$id?>, event)">
+                <div>
                     <textarea name="feedback" rows="4" cols="50" placeholder="Enter feedback here..." required></textarea><br/>
-                    <button type="submit">Add Feedback</button>
-                </form>
-                <div class="feedback-container">
-                    <div postload="<?="$baseURL&action=feedback&id=$id"?>">Loading feedback...</div>
+                    <button onclick="return submitFeedback(this, '<?=$id?>')">Add Feedback</button>
+                </div>
+                <div class="feedback-container" postload="<?="$baseURL&action=feedback&id=$id"?>">
+                    <div>Loading feedback...</div>
                 </div>
             </div>
         </td>
