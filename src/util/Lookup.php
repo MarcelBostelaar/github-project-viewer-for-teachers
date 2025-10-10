@@ -1,5 +1,7 @@
 <?php
 
+namespace GithubProjectViewer\Util;
+
 class Lookup{
     private $map;
     public function __construct(){

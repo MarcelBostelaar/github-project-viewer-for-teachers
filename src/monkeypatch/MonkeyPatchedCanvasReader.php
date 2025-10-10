@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . '/../services/interfaces/ICanvasReader.php';
+namespace GithubProjectViewer\Monkeypatch;
+use GithubProjectViewer\Services\CanvasReader;
+use GithubProjectViewer\Services\Interfaces\ICanvasReader;
 
 class MonkeyPatchedCanvasReader extends CanvasReader{
     private array $rerouteGroups = [];

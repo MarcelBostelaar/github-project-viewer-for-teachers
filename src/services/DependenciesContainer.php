@@ -1,31 +1,17 @@
 <?php
-require_once __DIR__ . '/CanvasReader.php';
-require_once __DIR__ . '/GithubProvider.php';
-require_once __DIR__ . '/GitProvider.php';
-require_once __DIR__ . '/SubmissionProvider.php';
-require_once __DIR__ . '/GroupProvider.php';
-require_once __DIR__ . '/SectionsProvider.php';
-require_once __DIR__ . '/VirtualIDsProvider.php';
-require_once __DIR__ . '/interfaces/ICanvasReader.php';
-require_once __DIR__ . '/interfaces/IGithubProvider.php';
-require_once __DIR__ . '/interfaces/IGitProvider.php';
-require_once __DIR__ . '/interfaces/ISubmissionProvider.php';
-require_once __DIR__ . '/interfaces/IGroupProvider.php';
-require_once __DIR__ . '/interfaces/ISectionsProvider.php';
-require_once __DIR__ . '/interfaces/IVirtualIDsProvider.php';
-require_once __DIR__ . '/../monkeypatch/MonkeyPatchedCanvasReader.php';
-require_once __DIR__ . '/../debug/CaptureAndPreventSubmissionFeedback.php';
+namespace GithubProjectViewer\Services;
+use GithubProjectViewer\Services\Interfaces as Interfaces;
 
 
 class DependenciesContainer
 {
-    public ICanvasReader $canvasReader;
-    public IGithubProvider $githubProvider;
-    public IGitProvider $gitProvider;
-    public ISubmissionProvider $submissionProvider;
-    public IGroupProvider $groupProvider;
-    public ISectionsProvider $sectionsProvider;
-    public IVirtualIDsProvider $virtualIDsProvider;
+    public Interfaces\ICanvasReader $canvasReader;
+    public Interfaces\IGithubProvider $githubProvider;
+    public Interfaces\IGitProvider $gitProvider;
+    public Interfaces\ISubmissionProvider $submissionProvider;
+    public Interfaces\IGroupProvider $groupProvider;
+    public Interfaces\ISectionsProvider $sectionsProvider;
+    public Interfaces\IVirtualIDsProvider $virtualIDsProvider;
 }
 
 function readerFromEnv($courseID, $assignmentID): CanvasReader{
@@ -45,7 +31,7 @@ function setupGlobalDependencies($courseID, $assignmentID): void
     $dependencies->groupProvider = new GroupProvider();
     $cloneToFolder = $env['clonetofolder'] ?? null;
     if ($cloneToFolder === null) {
-        throw new RuntimeException("clonetofolder not set in .env.");
+        throw new \RuntimeException("clonetofolder not set in .env.");
     }
     $dependencies->gitProvider = new GitProvider($cloneToFolder);
     $dependencies->submissionProvider = new SubmissionProvider();
@@ -57,7 +43,7 @@ function setupGlobalDependencies($courseID, $assignmentID): void
 
     //Money patch
     //Group set 1280 was removed, use 1300 instead for any assignments that used it
-    $dependencies->canvasReader = MonkeyPatchedCanvasReader::FromCanvasReader($dependencies->canvasReader, [1280 => 1300]);
+    $dependencies->canvasReader = \GithubProjectViewer\Monkeypatch\MonkeyPatchedCanvasReader::FromCanvasReader($dependencies->canvasReader, [1280 => 1300]);
     
     //set global provider variable
     $GLOBALS["providers"] = $dependencies;

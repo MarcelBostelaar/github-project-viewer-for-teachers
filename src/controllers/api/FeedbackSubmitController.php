@@ -1,6 +1,5 @@
 <?php
-
-require_once __DIR__ . '/APIController.php';
+namespace GithubProjectViewer\Controllers\Api;
 
 class FeedbackSubmitController extends APIController {
     protected $debug_keep_output = true;

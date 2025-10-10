@@ -1,18 +1,6 @@
 <?php
 
-class PaginationHeaderHandler{
-    public $nextURL = null;
-
-    public function handle($curl, $header_line){
-        if(str_starts_with($header_line , 'link:')){
-            if (preg_match('/<([^>]*)>;\s*rel="next"/', trim($header_line), $matches)) {
-                $this->nextURL = $matches[1];
-            }
-        }
-        // echo $header_line . "<br>";
-        return strlen($header_line);
-    }
-}
+namespace GithubProjectViewer\Util;
 
 function curlCall($url, $apiKey): array {
     // echo "Fetching URL: $url<br>";
@@ -38,7 +26,7 @@ function curlCall($url, $apiKey): array {
     // Handle errors
     if (curl_errno($ch)) {
         echo "cURL Error: " . curl_error($ch);
-        throw new Exception("cURL Error: " . curl_error($ch));
+        throw new \Exception("cURL Error: " . curl_error($ch));
     } else {
         $data = json_decode($response, true);
     }
@@ -50,7 +38,7 @@ function curlCall($url, $apiKey): array {
         foreach($data["errors"] as $message){
             $errors .= $message["message"] . "\n";
         }
-        throw new Exception($errors);
+        throw new \Exception($errors);
     }
     // var_dump($data);
     //if a next link for paginated results was found, call it recursively, append all results together.
@@ -61,7 +49,7 @@ function curlCall($url, $apiKey): array {
             //Assume the top key is the one that contains the list of results
             $topKey = array_key_first($data);
             if(count($data) != 1 || !array_is_list($data[$topKey])){
-                throw new Exception("Unexpected data structure when handling pagination for URL $url");
+                throw new \Exception("Unexpected data structure when handling pagination for URL $url");
             }
             $data = $data[$topKey];
             $additionalData = curlCall($nextURLHandler->nextURL, $apiKey)[$topKey];
@@ -101,7 +89,7 @@ function putCurlCall($url, $apiKey, $field, $data): void {
     // Handle errors
     if (curl_errno($ch)) {
         echo "cURL Error: " . curl_error($ch);
-        throw new Exception("cURL Error: " . curl_error($ch));
+        throw new \Exception("cURL Error: " . curl_error($ch));
     } else {
         $data = json_decode($response, true);
     }
@@ -113,6 +101,6 @@ function putCurlCall($url, $apiKey, $field, $data): void {
         foreach($data["errors"] as $message){
             $errors .= $message["message"] . "\n";
         }
-        throw new Exception($errors);
+        throw new \Exception($errors);
     }
 }

@@ -1,20 +1,15 @@
 <?php
 
-enum SubmissionStatus : string{
-    case MISSING = "Not submitted";
-    case NOTFOUND = "Not found (private?)";
-    case VALID_BUT_EMPTY = "Empty repository";
-    case VALID_URL = "Valid URL";
-}
-
+namespace GithubProjectViewer\Models\GithublinkSubmission;
+use GithubProjectViewer\Models as Models;
 
 interface IGithublinkSubmission{
     /**
-     * @return Student[]
+     * @return Models\Student[]
      */
     public function getStudents(): array;
     /**
-     * @return SubmissionFeedback[]
+     * @return Models\SubmissionFeedback[]
      */
     public function getFeedback(): array;
     /**
@@ -24,13 +19,13 @@ interface IGithublinkSubmission{
     public function submitFeedback(string $feedback): void;
     /**
      * 
-     * @return CommitHistoryEntry[]
+     * @return Models\CommitHistoryEntry[]
      */
     public function getCommitHistory(): array;
     public function clone(): string;
     public function getStatus(): SubmissionStatus;
-    public function getSubmissionDate(): ?DateTime;
-    public function getGroup(): ?Group;
+    public function getSubmissionDate(): ?\DateTime;
+    public function getGroup(): ?Models\Group;
 
     public function getId(): string;
     public function getUrl(): ?string;

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . "/CacheRules.php";
+namespace GithubProjectViewer\Util\Caching;
 class MaximumAPIKeyRestrictions extends AGeneralCacheRules{
     public function getKey(...$items): string{
         //Add the current course and API key to the cache key, so that different API keys in different courses get different cache entries.

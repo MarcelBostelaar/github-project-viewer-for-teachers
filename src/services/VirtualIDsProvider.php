@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/interfaces/IVirtualIDsProvider.php';
+namespace GithubProjectViewer\Services;
 
 class VirtualIDHandler {
     private $mapping = [];

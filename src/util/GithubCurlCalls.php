@@ -1,4 +1,5 @@
 <?php
+namespace GithubProjectViewer\Util;
 function githubCurlCall($url): array {
     // echo "Fetching URL: $url<br>";
     // Initialize cURL
@@ -25,7 +26,7 @@ function githubCurlCall($url): array {
     // Handle errors
     if (curl_errno($ch)) {
         echo "cURL Error: " . curl_error($ch);
-        throw new Exception("cURL Error: " . curl_error($ch));
+        throw new \Exception("cURL Error: " . curl_error($ch));
     } else {
         // formatted_var_dump($response);
         $data = json_decode($response, true);

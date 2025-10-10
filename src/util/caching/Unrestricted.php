@@ -1,5 +1,6 @@
 <?php
 
+namespace GithubProjectViewer\Util\Caching;
 class Unrestricted extends AGeneralCacheRules{
     public function getValidity(): bool {
         return true;

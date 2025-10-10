@@ -1,6 +1,7 @@
 <?php
-require_once __DIR__ . '/../services/DependenciesContainer.php';
-require_once __DIR__ . '/../util/UtilFuncs.php';
+
+namespace GithubProjectViewer\Controllers;
+
 class BaseController{
     protected $courseID;
     protected $assignmentID;

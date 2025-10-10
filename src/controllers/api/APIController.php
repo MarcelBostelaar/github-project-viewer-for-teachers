@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../BaseController.php';
+namespace GithubProjectViewer\Controllers\Api;
+use GithubProjectViewer\Controllers\BaseController;
 function erasethis($buffer)
 {
     return "";
@@ -18,7 +19,7 @@ abstract class APIController extends BaseController{
             header('Content-Type: application/json');
             echo json_encode($data);
             // var_dump($_SESSION['cache']["values"]);
-        }catch(Exception $e){
+        }catch(\Exception $e){
             if(!$this->debug_keep_output){
                 ob_end_flush();
             }

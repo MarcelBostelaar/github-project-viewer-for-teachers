@@ -1,11 +1,11 @@
 <?php
 
-require_once __DIR__ . '/../models/Student.php';
-require_once __DIR__ . '/../util/Caching/Caching.php';
-require_once __DIR__ . '/../util/Constants.php';
-require_once __DIR__ . '/../util/CanvasCurlCalls.php';
-require_once __DIR__ . '/../util/caching/CacheRules.php';
-require_once __DIR__ . '/interfaces/ICanvasReader.php';
+namespace GithubProjectViewer\Services;
+
+use Exception;
+use GithubProjectViewer\Services\Interfaces\ICanvasReader;
+use GithubProjectViewer\Util\curlCall;
+use GithubProjectViewer\Util\putCurlCall;
 
 class UncachedCanvasReader implements ICanvasReader{
     protected $apiKey;

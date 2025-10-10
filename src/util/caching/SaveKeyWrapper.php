@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/CacheRules.php';
+namespace GithubProjectViewer\Util\Caching;
 
 class SaveKeyWrapper implements CacheRules{
     public $generatedKey;

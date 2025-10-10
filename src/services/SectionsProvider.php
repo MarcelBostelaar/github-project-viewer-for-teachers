@@ -1,5 +1,8 @@
 <?php
-require_once __DIR__ . '/interfaces/ISectionsProvider.php';
+namespace GithubProjectViewer\Services;
+use GithubProjectViewer\Services\Interfaces\ISectionsProvider;
+use GithubProjectViewer\Util\Lookup;
+use GithubProjectViewer\Models as Models;
 
 class UncachedSectionsProvider implements ISectionsProvider{
     
@@ -19,7 +22,7 @@ class UncachedSectionsProvider implements ISectionsProvider{
         $perSection = array_map(fn($section) => [
             "name" => $section["name"],
             "students" => array_map(
-                fn($student) => new Student($student["id"], $student["name"]), 
+                fn($student) => new Models\Student($student["id"], $student["name"]), 
                 $providers->canvasReader->fetchStudentsInSection($section["id"]))
         ], $sectionData);
 
@@ -37,7 +40,7 @@ class SectionsProvider extends UncachedSectionsProvider{
     protected function getStudentSectionLookup(): Lookup{
         global $veryLongTimeout;
         //Maximally restricted to single api keys, so that each teacher only gets the sections and students they are allowed to see.
-        $data = cached_call(new CourseAPIKeyRestricted(), $veryLongTimeout,
+        $data = cached_call(new \CourseAPIKeyRestricted(), $veryLongTimeout,
         fn() => parent::getStudentSectionLookup(), "SectionProvider", "getStudentSectionLookup");
         return $data;
     }

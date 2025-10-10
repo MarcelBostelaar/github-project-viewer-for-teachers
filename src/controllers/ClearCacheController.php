@@ -1,6 +1,5 @@
 <?php
-require_once __DIR__ . '/../util/Caching/Caching.php';
-require_once __DIR__ . '/BaseController.php';
+namespace GithubProjectViewer\Controllers;
 
 class ClearCacheController{
     public function index(){

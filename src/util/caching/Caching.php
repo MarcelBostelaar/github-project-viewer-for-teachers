@@ -1,5 +1,6 @@
 <?php
 
+namespace GithubProjectViewer\Util\Caching;
 function init_cache(){
     $_SESSION['cache'] = [
         "values" => []

@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/GithubProvider.php';
-require_once __DIR__ . '/interfaces/IGitProvider.php';
 
+namespace GithubProjectViewer\Services;
+use GithubProjectViewer\Services\Interfaces\IGitProvider;
 class GitProvider implements IGitProvider{
     private string $folderpath;
     
@@ -22,7 +22,7 @@ class GitProvider implements IGitProvider{
         exec($command . ' 2>&1', $output, $returnCode);
         
         if ($returnCode !== 0) {
-            throw new RuntimeException("Git clone failed: " . implode("\n", $output));
+            throw new \Exception("Git clone failed: " . implode("\n", $output));
         }
         
         return $this->folderpath;

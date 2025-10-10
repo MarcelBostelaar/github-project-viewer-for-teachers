@@ -1,8 +1,10 @@
 <?php
-require_once __DIR__ . '/IGithublinkSubmission.php';
-require_once __DIR__ . '/../Group.php';
 
-class CantDetermineValidURLException extends Exception{}
+namespace GithubProjectViewer\Models\GithublinkSubmission;
+
+use GithubProjectViewer\Models as Models;
+
+class CantDetermineValidURLException extends \Exception{}
 
 /**
  * Allows multiple concrete submissions to be treated as one. Use to retroactively combine submissions from multiple students in a group assignment, for example, based on the groups as they exist now.
@@ -15,9 +17,9 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
      * @var ConcreteGithublinkSubmission[]
      */
     private array $children;
-    private Group $group;
+    private Models\Group $group;
 
-    public function __construct(Group $group, ... $children){
+    public function __construct(Models\Group $group, ... $children){
         $this->children = $children;
         $this->group = $group;
 
@@ -82,7 +84,7 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
     /**
      * @throws CantDetermineValidURLException
      * @throws IllegalCallToInvalidSubmissionException
-     * @return CommitHistoryEntry[]
+     * @return Models\CommitHistoryEntry[]
      */
     public function getCommitHistory(): array{
         return $this->getMostLikelyValidChildOrThrow()->getCommitHistory();
@@ -114,7 +116,7 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
         return $highestFind;
     }
 
-    public function getSubmissionDate(): ?DateTime{
+    public function getSubmissionDate(): ?\DateTime{
         $dates = array_map(fn($child) => $child->getSubmissionDate(), $this->children);
         $dates = array_filter($dates, fn($d) => $d !== null);
         if(count($dates) === 0){
@@ -123,7 +125,7 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
         return max($dates);
     }
 
-    public function getGroup(): ?Group{
+    public function getGroup(): ?Models\Group{
         return $this->group;
     }
 

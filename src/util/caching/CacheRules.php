@@ -1,5 +1,7 @@
 <?php
 
+namespace GithubProjectViewer\Util\Caching;
+
 interface CacheRules{
     public function getKey(...$items): string;
     public function serializeItem($item): string;

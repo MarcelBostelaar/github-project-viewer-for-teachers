@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../views/Overview.php';
+
+namespace GithubProjectViewer\Controllers;
 
 class OverviewController extends BaseController {
     public function route() {
@@ -27,7 +27,10 @@ class OverviewController extends BaseController {
     public function index(){
         global $providers;
         $AllSubmissions = $providers->submissionProvider->getAllSubmissions();
-        RenderOverview($AllSubmissions, $this->getBaseURL());
+        // RenderOverview($AllSubmissions, $this->getBaseURL());
+        echo "<h1>GitHub Project Viewer</h1>";
+        echo "<p>Autoloader working! Course ID: $this->courseID, Assignment ID: $this->assignmentID</p>";
+        echo "<p>Found " . count($AllSubmissions) . " submissions.</p>";
     }
 
     public function feedback(){

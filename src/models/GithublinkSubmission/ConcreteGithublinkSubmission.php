@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/../SubmissionFeedback.php';
-require_once __DIR__ . '/../CommitHistoryEntry.php';
-require_once __DIR__ . '/IGithublinkSubmission.php';
 
-class IllegalCallToInvalidSubmissionException extends Exception{}
+namespace GithubProjectViewer\Models\GithublinkSubmission;
+use GithubProjectViewer\Models as Models;
+
+class IllegalCallToInvalidSubmissionException extends \Exception{}
 
 /**
  * Represents an actual submission in canvas by a single student. If the submission was made by a student then in a group, the groupID of the group that made the submission is stored.
@@ -11,11 +11,11 @@ class IllegalCallToInvalidSubmissionException extends Exception{}
 class ConcreteGithublinkSubmission implements IGithublinkSubmission{
 
     private string $url;
-    private DateTime | null $submittedAt;
-    private Student $submittingStudent;
+    private \DateTime | null $submittedAt;
+    private Models\Student $submittingStudent;
     private int $canvasID;
 
-    public function __construct(string $url, int $canvasID, Student $submittingStudent, ?DateTime $submittedAt = null){
+    public function __construct(string $url, int $canvasID, Models\Student $submittingStudent, ?\DateTime $submittedAt = null){
         $this->url = $url;
         $this->canvasID = $canvasID;
         $this->submittedAt = $submittedAt;
@@ -29,7 +29,7 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
         return $this->canvasID;
     }
 
-    public function getGroup(): ?Group{
+    public function getGroup(): ?Models\Group{
         global $providers;
         $lookup = $providers->groupProvider->getStudentGroupLookup();
         $groups = $lookup->getItem($this->submittingStudent);
@@ -37,7 +37,7 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
             return null;
         }
         if(count($groups) > 1){
-            throw new Exception("Student in multiple groups, should not be possible");
+            throw new \Exception("Student in multiple groups, should not be possible");
         }
         return $groups[0];
     }
@@ -48,20 +48,20 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
 
     /**
      * Returns the student who made the submission
-     * @return Student[]
+     * @return Models\Student[]
      */
     public function getStudents(): array{
         return [$this->submittingStudent];
     }
 
-    public function getStudent(): Student{
+    public function getStudent(): Models\Student{
         return $this->submittingStudent;
     }
 
     /**
      * Summary of getFeedback
      * @throws \Exception
-     * @return SubmissionFeedback[]
+     * @return Models\SubmissionFeedback[]
      */
     public function getFeedback(): array{
         global $providers;
@@ -82,7 +82,7 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
     /**
      * Summary of getCommitHistory
      * @throws \Exception
-     * @return CommitHistoryEntry[]
+     * @return Models\CommitHistoryEntry[]
      */
     public function getCommitHistory(): array{
         global $providers;
@@ -113,7 +113,7 @@ class ConcreteGithublinkSubmission implements IGithublinkSubmission{
         return $providers->githubProvider->validateUrl($this->url);
     }
 
-    public function getSubmissionDate(): ?DateTime{
+    public function getSubmissionDate(): ?\DateTime{
         return $this->submittedAt;
     }
 

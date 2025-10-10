@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . "/Lookup.php";
+namespace GithubProjectViewer\Util;
 
 function isSetMany($object, ...$keys): mixed{
     foreach($keys as $key){
@@ -35,7 +35,7 @@ function shiftArrayToRight(&$array, $fillValueGenerator = null, $positions = 1){
 
 function roundToNearestFraction(float $value, int $n): float {
     if ($n <= 0) {
-        throw new InvalidArgumentException('n must be a positive integer');
+        throw new \InvalidArgumentException('n must be a positive integer');
     }
     $fraction = 1 / $n;
     return round($value * $fraction) / $fraction;

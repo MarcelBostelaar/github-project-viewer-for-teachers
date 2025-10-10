@@ -1,5 +1,7 @@
 <?php
 
+namespace GithubProjectViewer\Services\Interfaces;
+
 interface ICanvasReader {
     public function getApiKey();
     public function getCourseURL();

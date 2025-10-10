@@ -1,5 +1,9 @@
 <?php
 
+namespace GithubProjectViewer\Services\Interfaces;
+
+use GithubProjectViewer\Util\Lookup;
+
 interface IGroupProvider {
     public function getStudentsInGroup(int $groupID): array;
     public function getAllGroupsWithStudents(): array;

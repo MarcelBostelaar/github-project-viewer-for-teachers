@@ -1,4 +1,5 @@
 <?php
+namespace GithubProjectViewer\Util;
 
 $env = parse_ini_file(__DIR__ . '/../../.env');
 $apiKey = $env['APIKEY'];

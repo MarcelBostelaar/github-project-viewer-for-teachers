@@ -1,10 +1,16 @@
 <?php
-require_once __DIR__ . '/../util/caching/Caching.php';
-require_once __DIR__ . '/../util/caching/SaveKeyWrapper.php';
-require_once __DIR__ . '/../util/caching/Unrestricted.php';
-require_once __DIR__ . '/../util/caching/SetMetadataType.php';
-require_once __DIR__ . '/../util/GithubCurlCalls.php';
-require_once __DIR__ . '/interfaces/IGithubProvider.php';
+
+namespace GithubProjectViewer\Services;
+
+use DateTime;
+use Error;
+use Exception;
+use GithubProjectViewer\Models\CommitHistoryEntry;
+use GithubProjectViewer\Models\GithublinkSubmission\SubmissionStatus;
+use GithubProjectViewer\Services\Interfaces\IGithubProvider;
+use GithubProjectViewer\Util\Caching\SaveKeyWrapper;
+use GithubProjectViewer\Util\Caching\Unrestricted;
+use GithubProjectViewer\Util\Caching\SetMetadataType;
 
 class DisectedURL{
     public string $owner;
@@ -117,7 +123,7 @@ class UncachedGithubProvider implements IGithubProvider{
 
 class GithubProvider extends UncachedGithubProvider{
     public function validateUrl(string $url): SubmissionStatus {
-        $rules = new SaveKeyWrapper(new SetMetadataType(new Unrestricted(), "github"));
+        $rules = new \SaveKeyWrapper(new \SetMetadataType(new \Unrestricted(), "github"));
         global $veryLongTimeout, $dayTimeout;
         $result = cached_call($rules, 
         $dayTimeout, fn() => parent::validateUrl($url),
@@ -133,7 +139,7 @@ class GithubProvider extends UncachedGithubProvider{
     }
 
     public function getCommitHistory(string $url): array {
-        $rules = new SetMetadataType(new Unrestricted(), "github");
+        $rules = new \SetMetadataType(new \Unrestricted(), "github");
         global $dayTimeout;
         $result = cached_call($rules, 
         $dayTimeout, fn() => parent::getCommitHistory($url),
@@ -143,7 +149,7 @@ class GithubProvider extends UncachedGithubProvider{
 
     protected function getCommitHistoryInternal(DisectedURL $url) : array | SubmissionStatus {
         global $dayTimeout;
-        $rules = new SetMetadataType(new Unrestricted(), "github");
+        $rules = new \SetMetadataType(new \Unrestricted(), "github");
         $result = cached_call($rules, 
         $dayTimeout, fn() => parent::getCommitHistoryInternal($url),
         "GithubProvider", "getCommitHistoryInternal", $url);

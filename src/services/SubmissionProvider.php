@@ -1,11 +1,12 @@
 <?php
-require_once __DIR__ . '/../models//GithublinkSubmission/IGithublinkSubmission.php';
-require_once __DIR__ . '/../models//GithublinkSubmission/ConcreteGithublinkSubmission.php';
-require_once __DIR__ . '/../models//GithublinkSubmission/CombinedGithublinkSubmission.php';
-require_once __DIR__ . '/../util/UtilFuncs.php';
-require_once __DIR__ . '/../util/caching/MaximumAPIKeyRestrictions.php';
-require_once __DIR__ . '/../util/caching/CourseAPIKeyRestricted.php';
-require_once __DIR__ . '/interfaces/ISubmissionProvider.php';
+
+namespace GithubProjectViewer\Services;
+use GithubProjectViewer\Services\Interfaces\ISubmissionProvider;
+use GithubProjectViewer\Models\GithublinkSubmission\ConcreteGithublinkSubmission;
+use GithubProjectViewer\Models\GithublinkSubmission\CombinedGithublinkSubmission;
+use GithubProjectViewer\Models\GithublinkSubmission\IGithublinkSubmission;
+use GithubProjectViewer\Models as Models;
+use GithubProjectViewer\Util\Lookup;
 
 
 class UncachedSubmissionProvider implements ISubmissionProvider{
@@ -20,8 +21,8 @@ class UncachedSubmissionProvider implements ISubmissionProvider{
         $processed = array_map(fn($x) => new ConcreteGithublinkSubmission(
             $x["url"] ?? "",
             $x["id"],
-            new Student($x["user"]["id"], $x["user"]["name"]),
-            $x["submitted_at"] ? new DateTime($x["submitted_at"]) : null
+            new Models\Student($x["user"]["id"], $x["user"]["name"]),
+            $x["submitted_at"] ? new \DateTime($x["submitted_at"]) : null
         ), $data);
         return $processed;
     }
@@ -54,7 +55,7 @@ class UncachedSubmissionProvider implements ISubmissionProvider{
                 //Not in any group
             }
             else if(count($group) > 1){
-                throw new Exception("Multiple groups for student found, should not be possible");
+                throw new \Exception("Multiple groups for student found, should not be possible");
             }
             else{
                 $toGroupLookup->add($group[0], $submission);
@@ -106,7 +107,7 @@ class UncachedSubmissionProvider implements ISubmissionProvider{
         global $providers;
         $data = $providers->canvasReader->fetchSubmissionComments($userID);
         $comments = $data["submission_comments"];
-        return array_map(fn($x) => new SubmissionFeedback(
+        return array_map(fn($x) => new Models\SubmissionFeedback(
             $x["author_name"],
             new DateTime($x["created_at"]),
             $x["comment"]

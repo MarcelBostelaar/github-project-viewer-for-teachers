@@ -1,5 +1,6 @@
 <?php
 
+namespace GithubProjectViewer\Util\Caching;
 class SetMetadata implements CacheRules{
     public CacheRules $wrapped;
     private array $metadata;

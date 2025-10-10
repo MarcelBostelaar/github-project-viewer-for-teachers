@@ -1,5 +1,7 @@
 <?php
 
+namespace GithubProjectViewer\Models;
+
 class Student{
     public $id;
     public $name;

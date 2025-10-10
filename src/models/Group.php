@@ -1,5 +1,7 @@
 <?php
 
+namespace GithubProjectViewer\Models;
+
 class Group{
     public int $id;
     public string $name;
