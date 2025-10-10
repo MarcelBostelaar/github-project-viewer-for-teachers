@@ -7,7 +7,7 @@ class DependenciesContainer
 {
     public Interfaces\ICanvasReader $canvasReader;
     public Interfaces\IGithubProvider $githubProvider;
-    public Interfaces\IGitProvider $gitProvider;
+    public Interfaces\ILocalGitProvider $gitProvider;
     public Interfaces\ISubmissionProvider $submissionProvider;
     public Interfaces\IGroupProvider $groupProvider;
     public Interfaces\ISectionsProvider $sectionsProvider;

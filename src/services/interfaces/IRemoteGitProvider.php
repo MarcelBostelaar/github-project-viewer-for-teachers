@@ -1,8 +1,0 @@
-<?php
-
-namespace GithubProjectViewer\Services\Interfaces;
-
-interface IRemoteGitProvider {
-    public function validateUrl(string $url): SubmissionStatus;
-    public function getCommitHistory(string $url): array;
-}

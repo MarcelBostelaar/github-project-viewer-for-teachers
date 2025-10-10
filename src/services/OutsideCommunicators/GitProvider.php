@@ -1,8 +1,7 @@
 <?php
 
-namespace GithubProjectViewer\Services;
-use GithubProjectViewer\Services\Interfaces\IGitProvider;
-class GitProvider implements IGitProvider{
+namespace GithubProjectViewer\Services\OutsideCommunicators;
+class GitProvider{
     private string $folderpath;
     
     public function __construct(string $folderpath) {

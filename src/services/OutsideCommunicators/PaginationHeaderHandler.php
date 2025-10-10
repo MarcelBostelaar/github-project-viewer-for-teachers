@@ -1,6 +1,9 @@
 <?php
 
-namespace GithubProjectViewer\Util;
+namespace GithubProjectViewer\Services\OutsideCommunicators;
+/**
+ * Used in get calls to canvas to handle paginated results
+ */
 class PaginationHeaderHandler{
     public $nextURL = null;
 

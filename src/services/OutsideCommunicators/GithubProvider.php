@@ -1,16 +1,12 @@
 <?php
 
-namespace GithubProjectViewer\Services;
+namespace GithubProjectViewer\Services\OutsideCommunicators;
 
 use DateTime;
 use Error;
 use Exception;
 use GithubProjectViewer\Models\CommitHistoryEntry;
 use GithubProjectViewer\Models\GithublinkSubmission\SubmissionStatus;
-use GithubProjectViewer\Services\Interfaces\IGithubProvider;
-use GithubProjectViewer\Util\Caching\SaveKeyWrapper;
-use GithubProjectViewer\Util\Caching\Unrestricted;
-use GithubProjectViewer\Util\Caching\SetMetadataType;
 
 class DisectedURL{
     public string $owner;
@@ -49,7 +45,18 @@ class DisectedURL{
     }
 }
 
-class UncachedGithubProvider implements IGithubProvider{
+class GithubProvider{
+    private ?string $githubAuthKey;
+
+    public function __construct(string $githubAuthKey = null){
+        $trimmed = trim($githubAuthKey);
+        if($trimmed === ""){
+            $this->githubAuthKey = null;
+        }
+        else{
+            $this->githubAuthKey = $trimmed;
+        }
+    }
     
     public function validateUrl(string $url) : SubmissionStatus{
         //ping and return false if 404
@@ -65,12 +72,12 @@ class UncachedGithubProvider implements IGithubProvider{
     }
 
     /**
-     * Tried to retrieve commit history. Does not depend on validate url, so can be used to check for empty repos.
+     * Tries to retrieve commit history. Does not depend on validate url, so can be used to check for empty repos.
      * @param DisectedURL $url
      * @return CommitHistoryEntry[]|SubmissionStatus
      */
     protected function getCommitHistoryInternal(DisectedURL $url) : array | SubmissionStatus {
-        $data = githubCurlCall($url->toApiUrl() . "/commits");
+        $data = self::githubCurlCall($url->toApiUrl() . "/commits");
         if(isset($data['status'])){
             if($data["status"] == 404){
                 return SubmissionStatus::NOTFOUND;
@@ -119,40 +126,77 @@ class UncachedGithubProvider implements IGithubProvider{
         }
         return $result;
     }
+
+    private function githubCurlCall($url): array {
+        // echo "Fetching URL: $url<br>";
+        // Initialize cURL
+        $ch = curl_init($url);
+
+        $headers = [
+            "User-Agent: Student Project Viewer",
+            "Content-Type: application/json"
+        ];
+        if($this->githubAuthKey !== null){
+            $headers[] = "Authorization: Bearer $this->githubAuthKey";
+        }
+
+        // Set headers
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        // Return response instead of outputting
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        // Execute
+        $response = curl_exec($ch);
+
+        // Handle errors
+        if (curl_errno($ch)) {
+            echo "cURL Error: " . curl_error($ch);
+            throw new Exception("cURL Error: " . curl_error($ch));
+        } else {
+            // formatted_var_dump($response);
+            $data = json_decode($response, true);
+        }
+
+        // Close
+        curl_close($ch);
+        // echo "Total data: " . count($data) . "<br>";
+        return $data;
+    }
 }
 
-class GithubProvider extends UncachedGithubProvider{
-    public function validateUrl(string $url): SubmissionStatus {
-        $rules = new \SaveKeyWrapper(new \SetMetadataType(new \Unrestricted(), "github"));
-        global $veryLongTimeout, $dayTimeout;
-        $result = cached_call($rules, 
-        $dayTimeout, fn() => parent::validateUrl($url),
-        "GithubProvider", "validateURL", $url);
-        if($result === SubmissionStatus::VALID_URL){
-            //Very long cache.
-            changeCacheExpireTimeForKey($rules->generatedKey, $veryLongTimeout);
-        }
-        else{
-            //Very short cache.
-        }
-        return $result;
-    }
+// class GithubProvider extends UncachedGithubProvider{
+//     public function validateUrl(string $url): SubmissionStatus {
+//         $rules = new \SaveKeyWrapper(new \SetMetadataType(new \Unrestricted(), "github"));
+//         global $veryLongTimeout, $dayTimeout;
+//         $result = cached_call($rules, 
+//         $dayTimeout, fn() => parent::validateUrl($url),
+//         "GithubProvider", "validateURL", $url);
+//         if($result === SubmissionStatus::VALID_URL){
+//             //Very long cache.
+//             changeCacheExpireTimeForKey($rules->generatedKey, $veryLongTimeout);
+//         }
+//         else{
+//             //Very short cache.
+//         }
+//         return $result;
+//     }
 
-    public function getCommitHistory(string $url): array {
-        $rules = new \SetMetadataType(new \Unrestricted(), "github");
-        global $dayTimeout;
-        $result = cached_call($rules, 
-        $dayTimeout, fn() => parent::getCommitHistory($url),
-        "GithubProvider", "getCommitHistory", $url);
-        return $result;
-    }
+//     public function getCommitHistory(string $url): array {
+//         $rules = new \SetMetadataType(new \Unrestricted(), "github");
+//         global $dayTimeout;
+//         $result = cached_call($rules, 
+//         $dayTimeout, fn() => parent::getCommitHistory($url),
+//         "GithubProvider", "getCommitHistory", $url);
+//         return $result;
+//     }
 
-    protected function getCommitHistoryInternal(DisectedURL $url) : array | SubmissionStatus {
-        global $dayTimeout;
-        $rules = new \SetMetadataType(new \Unrestricted(), "github");
-        $result = cached_call($rules, 
-        $dayTimeout, fn() => parent::getCommitHistoryInternal($url),
-        "GithubProvider", "getCommitHistoryInternal", $url);
-        return $result;
-    }
-}
+//     protected function getCommitHistoryInternal(DisectedURL $url) : array | SubmissionStatus {
+//         global $dayTimeout;
+//         $rules = new \SetMetadataType(new \Unrestricted(), "github");
+//         $result = cached_call($rules, 
+//         $dayTimeout, fn() => parent::getCommitHistoryInternal($url),
+//         "GithubProvider", "getCommitHistoryInternal", $url);
+//         return $result;
+//     }
+// }
