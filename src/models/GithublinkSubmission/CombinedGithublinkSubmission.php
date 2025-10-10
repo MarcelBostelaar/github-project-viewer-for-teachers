@@ -59,43 +59,24 @@ class CombinedGithublinkSubmission implements IGithublinkSubmission{
     }
 
     /**
-     * Returns the child submission with the best valid URL, or throws if none are valid.
-     * If multiple valid URLs are found, returns the most common one.
-     * If multiple valid URLs are tied for most common, throws an Exception.
+     * Returns the child with the most recent commit.
      * @throws CantDetermineValidURLException
      * @throws IllegalCallToInvalidSubmissionException
      * @return ConcreteGithublinkSubmission
      */
     private function getMostLikelyValidChildOrThrow(): ConcreteGithublinkSubmission{
-        $urls = [];
-        foreach($this->children as $child){
-            if($child->getStatus() === SubmissionStatus::VALID_URL){
-                if(!array_key_exists($child->getUrl(), $urls)){
-                    $urls[$child->getUrl()] = [];
-                }
-                if($child->getUrl() == ""){
-                    throw new Exception("Child with VALID_URL status has empty URL, should not be possible");
-                }
-                $urls[$child->getUrl()][] = $child;
-            }
-        }
-        if(count($urls) === 0){
+        $children = $this->children;
+        $children = array_filter($children, fn($x) => $x->getStatus() == SubmissionStatus::VALID_URL);
+        if(count($children) === 0){
             throw new IllegalCallToInvalidSubmissionException("No valid URLs found in combined submission");
         }
-        $processed = array_map(fn($x) => [
-            "count" => count($x),
-            "a_child" => $x[0]
-        ], $urls);
-        usort($processed, fn($a, $b) => $b["count"] <=> $a["count"]);
-        $highest = array_shift($processed);
-        foreach($processed as $entry){
-            if($entry["count"] < $highest["count"]){
-                return $highest['a_child'];
-            } else if($entry["count"] === $highest["count"]){
-                throw new CantDetermineValidURLException("Multiple valid URLs tied for most common in combined submission");
-            }
-        }
-        return $highest['a_child'];
+        $children = array_map(
+            fn($x) => [
+                "mostrecentcommit" => max(array_map(fn($y) => $y->date, $x->getCommitHistory())),
+                "child" => $x],
+            $children);
+        uasort($children, fn($a, $b) => $b["mostrecentcommit"] <=> $a["mostrecentcommit"]);
+        return array_values($children)[0]["child"];
     }
 
     /**
